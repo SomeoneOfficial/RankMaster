@@ -2408,6 +2408,14 @@ function scheduleCloudSave(){
   clearTimeout(cloudSaveTimer);
   cloudSaveTimer=setTimeout(()=>{syncNowToCloud(true);},CLOUD_SYNC_DEBOUNCE_MS);
 }
+function flushCloudSaveNow(){
+  if(!supabaseClient||!cloudUser||isApplyingCloudState)return;
+  if(cloudSaveTimer){
+    clearTimeout(cloudSaveTimer);
+    cloudSaveTimer=null;
+  }
+  syncNowToCloud(true);
+}
 async function fetchCloudSnapshot(){
   if(!supabaseClient||!cloudUser)return null;
   const {data,error}=await supabaseClient
@@ -2449,18 +2457,9 @@ async function maybeLoadCloudOnSignIn(){
     }
     return;
   }
-  const hasLocal=countSavedItems(state)>0;
-  const localScore=countSavedItems(state);
-  const cloudScore=countSavedItems(snap.app_state);
-  const shouldAutoLoad=!hasLocal||cloudScore>localScore;
-  if(shouldAutoLoad){
-    applyCloudSnapshot(snap.app_state);
-    cloudLastSyncAt=snap.updated_at||'';
-    showToast('Cloud data loaded for this account.','success');
-    updateCloudAuthUI();
-    return;
-  }
-  setCloudStatusText('Cloud data exists. Use "Download Cloud Data" if you want to replace local data.');
+  applyCloudSnapshot(snap.app_state);
+  cloudLastSyncAt=snap.updated_at||'';
+  setCloudStatusText('Loaded latest cloud data for this account.');
   updateCloudAuthUI();
 }
 async function downloadCloudState(){
@@ -2531,6 +2530,11 @@ async function initCloudSync(){
     }
     updateCloudAuthUI();
   });
+  document.addEventListener('visibilitychange',()=>{
+    if(document.visibilityState==='hidden')flushCloudSaveNow();
+  });
+  window.addEventListener('pagehide',flushCloudSaveNow);
+  window.addEventListener('beforeunload',flushCloudSaveNow);
 }
 async function init(){
   try{const s=localStorage.getItem(LOCAL_STATE_KEY);if(s){const p=JSON.parse(s);if(p?.players){state=p;}}}catch(e){}
