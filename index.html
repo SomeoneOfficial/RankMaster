@@ -709,6 +709,8 @@ body.feature-party .card-lg,body.feature-party .settings-section{box-shadow:0 0 
   <div class="header-actions">
     <button class="btn btn-secondary btn-sm" onclick="downloadJSON()">⬇ Export</button>
     <label class="btn btn-secondary btn-sm" style="cursor:pointer">⬆ Import<input type="file" accept=".json" onchange="importJSON(event)" style="display:none"></label>
+    <button class="btn btn-blue btn-sm" onclick="openCloudModal()">☁️ Cloud</button>
+    <span id="cloud-user-chip" class="btn btn-secondary btn-sm" style="cursor:default;">Cloud: Local only</span>
     <button class="btn btn-secondary btn-sm" onclick="switchTab('settings')">⚙️ Settings</button>
   </div>
 </header>
@@ -1101,6 +1103,11 @@ body.feature-party .card-lg,body.feature-party .settings-section{box-shadow:0 0 
         <h2>📋 Data</h2>
         <div class="settings-grid">
           <div class="settings-action">
+            <div class="sa-title">☁️ Cloud Account</div>
+            <div class="sa-desc">Sign in, sync to cloud, and use the same account on every device.</div>
+            <button class="btn btn-blue btn-sm" onclick="openCloudModal()">Open</button>
+          </div>
+          <div class="settings-action">
             <div class="sa-title">⬇️ Export</div>
             <div class="sa-desc">Download JSON backup.</div>
             <button class="btn btn-secondary btn-sm" onclick="downloadJSON()">Export</button>
@@ -1227,6 +1234,42 @@ body.feature-party .card-lg,body.feature-party .settings-section{box-shadow:0 0 
   </div>
 </div>
 
+<!-- CLOUD ACCOUNT MODAL -->
+<div class="modal-overlay" id="cloud-modal">
+  <div class="modal">
+    <h2>☁️ Cloud Sync Account</h2>
+    <p id="cloud-status-text" style="font-size:.82rem;color:var(--muted);margin-bottom:12px;">Sign in to sync the same data across devices.</p>
+    <div id="cloud-auth-view">
+      <div style="display:flex;gap:8px;margin-bottom:10px;">
+        <button id="cloud-mode-login" class="btn btn-secondary btn-sm" onclick="switchCloudAuthMode('login')">Log In</button>
+        <button id="cloud-mode-signup" class="btn btn-secondary btn-sm" onclick="switchCloudAuthMode('signup')">Sign Up</button>
+      </div>
+      <div class="form-group"><label>Email</label><input type="email" id="cloud-email" placeholder="you@example.com"></div>
+      <div class="form-group"><label>Password</label><input type="password" id="cloud-password" placeholder="At least 6 characters"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+        <button class="btn btn-primary btn-sm" onclick="submitCloudAuth()">Continue</button>
+        <button class="btn btn-secondary btn-sm" onclick="sendCloudPasswordReset()">Reset Password</button>
+      </div>
+      <div style="font-size:.75rem;color:var(--muted);margin-top:8px;">Uses Supabase Auth. If email confirmation is enabled, check your inbox after sign-up.</div>
+    </div>
+    <div id="cloud-session-view" style="display:none;">
+      <div style="padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;margin-bottom:10px;">
+        <div style="font-size:.74rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;">Signed in as</div>
+        <div id="cloud-user-email" style="font-weight:700;"></div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-primary btn-sm" onclick="syncNowToCloud()">Sync Now</button>
+        <button class="btn btn-secondary btn-sm" onclick="downloadCloudState()">Download Cloud Data</button>
+        <button class="btn btn-secondary btn-sm" onclick="signOutCloud()">Log Out</button>
+      </div>
+      <div id="cloud-last-sync" style="font-size:.75rem;color:var(--muted);margin-top:8px;"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('cloud-modal')">Close</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 <div class="milestone-toast" id="milestone-toast">
   <div class="mt-icon" id="mt-icon"></div>
@@ -1234,6 +1277,7 @@ body.feature-party .card-lg,body.feature-party .settings-section{box-shadow:0 0 
   <div class="mt-sub" id="mt-sub"></div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // ===================== CONSTANTS =====================
 const COLORS=['#f0c040','#e05a30','#3dd68c','#5ab4f0','#c07af0','#f05a8a','#40c0c0','#e09030','#90c040','#f06060','#f0a050','#70d0f0'];
@@ -1345,7 +1389,13 @@ const CORE_FEATURE_TOGGLES=[
 ];
 const FEATURE_TOGGLES=[...CORE_FEATURE_TOGGLES];
 const VISUAL_FEATURE_IDS=new Set(['ft_focus_mode','ft_compact_history','ft_colorful_badges','ft_bold_titles','ft_cinematic_mode','ft_feature_party','ft_hot_streak_fx']);
+const LOCAL_STATE_KEY='rankmaster_pro_state';
 const FEATURE_PREFS_KEY='rankmaster_pro_feature_prefs';
+const CLOUD_USER_KEY='rankmaster_cloud_user';
+const CLOUD_STATE_TABLE='rankmaster_user_state';
+const SUPABASE_URL='https://wkoohtlkjmkeeirvlcah.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY='sb_publishable_ciEUksEWtbNcAx_gLJADxw_jcTjX8tS';
+const CLOUD_SYNC_DEBOUNCE_MS=1400;
 
 let state={players:[],history:[],nextId:1,tournament:null,achievements:{},lowestRatings:{},matchPoints:10,topRankEmoji:'🐦',theme:'neon',density:'comfort',dailyGoal:5,dailyDate:'',dailyCount:0,boldText:false,mobileLock:true,featureFlags:{}};
 let selectedColor=COLORS[0], editSelectedColor=COLORS[0], editingId=null, pendingChanges=null;
@@ -1356,6 +1406,13 @@ let winnerActionLock=false;
 let currentSettingsPane='general';
 let currentFeatureType='core';
 let showWinProbability=false;
+let cloudAuthMode='login';
+let supabaseClient=null;
+let cloudUser=null;
+let cloudSaveTimer=null;
+let isApplyingCloudState=false;
+let cloudSyncInFlight=false;
+let cloudLastSyncAt='';
 
 function ensureStateDefaults(){
   if(!state.achievements)state.achievements={};
@@ -2220,8 +2277,243 @@ function drawRatingGraph(playerId,canvasId){
 }
 
 // ===================== INIT =====================
-function init(){
-  try{const s=localStorage.getItem('rankmaster_pro_state');if(s){const p=JSON.parse(s);if(p?.players){state=p;}}}catch(e){}
+function canUseCloudSync(){
+  return !!(window.supabase&&typeof window.supabase.createClient==='function'&&SUPABASE_URL&&SUPABASE_PUBLISHABLE_KEY);
+}
+function countSavedItems(snapshot){
+  if(!snapshot||typeof snapshot!=='object')return 0;
+  const pCount=Array.isArray(snapshot.players)?snapshot.players.length:0;
+  const hCount=Array.isArray(snapshot.history)?snapshot.history.length:0;
+  return pCount+hCount;
+}
+function setCloudStatusText(msg,color='var(--muted)'){
+  const el=document.getElementById('cloud-status-text');
+  if(!el)return;
+  el.textContent=msg;
+  el.style.color=color;
+}
+function updateCloudAuthUI(){
+  const chip=document.getElementById('cloud-user-chip');
+  const authView=document.getElementById('cloud-auth-view');
+  const sessionView=document.getElementById('cloud-session-view');
+  const mail=document.getElementById('cloud-user-email');
+  const syncInfo=document.getElementById('cloud-last-sync');
+  const loginBtn=document.getElementById('cloud-mode-login');
+  const signupBtn=document.getElementById('cloud-mode-signup');
+
+  if(loginBtn)loginBtn.style.borderColor=cloudAuthMode==='login'?'var(--accent)':'var(--border)';
+  if(signupBtn)signupBtn.style.borderColor=cloudAuthMode==='signup'?'var(--accent)':'var(--border)';
+
+  if(!canUseCloudSync()){
+    if(chip)chip.textContent='Cloud: unavailable';
+    if(authView)authView.style.display='none';
+    if(sessionView)sessionView.style.display='none';
+    setCloudStatusText('Cloud client could not initialize.','var(--red)');
+    return;
+  }
+  if(cloudUser){
+    if(chip)chip.textContent=`Cloud: ${cloudUser.email||'Signed in'}`;
+    if(authView)authView.style.display='none';
+    if(sessionView)sessionView.style.display='block';
+    if(mail)mail.textContent=cloudUser.email||'Signed in user';
+    if(syncInfo)syncInfo.textContent=cloudLastSyncAt?`Last cloud sync: ${formatTime(new Date(cloudLastSyncAt))}`:'Cloud sync is ready.';
+    setCloudStatusText('Account connected. Your changes auto-sync to cloud.');
+  }else{
+    if(chip)chip.textContent='Cloud: Local only';
+    if(authView)authView.style.display='block';
+    if(sessionView)sessionView.style.display='none';
+    if(syncInfo)syncInfo.textContent='';
+    setCloudStatusText('Sign in or create an account to sync data across devices.');
+  }
+}
+function switchCloudAuthMode(mode){
+  cloudAuthMode=mode==='signup'?'signup':'login';
+  updateCloudAuthUI();
+}
+function openCloudModal(){
+  updateCloudAuthUI();
+  document.getElementById('cloud-modal').classList.add('show');
+}
+function getCloudAuthInput(){
+  const email=(document.getElementById('cloud-email')?.value||'').trim();
+  const password=(document.getElementById('cloud-password')?.value||'').trim();
+  return{email,password};
+}
+async function submitCloudAuth(){
+  if(!supabaseClient){showToast('Cloud sync is not available yet.','error');return;}
+  const {email,password}=getCloudAuthInput();
+  if(!email||!password){showToast('Enter email and password first.','error');return;}
+  try{
+    if(cloudAuthMode==='signup'){
+      const {error}=await supabaseClient.auth.signUp({
+        email,
+        password,
+        options:{emailRedirectTo:window.location.href}
+      });
+      if(error)throw error;
+      showToast('Account created. Check email if confirmation is required.','success');
+    }else{
+      const {error}=await supabaseClient.auth.signInWithPassword({email,password});
+      if(error)throw error;
+      showToast('Signed in.','success');
+    }
+  }catch(err){
+    showToast(err?.message||'Cloud auth failed.','error');
+  }
+}
+async function sendCloudPasswordReset(){
+  if(!supabaseClient){showToast('Cloud sync is not available yet.','error');return;}
+  const email=(document.getElementById('cloud-email')?.value||'').trim();
+  if(!email){showToast('Enter your email to reset password.','error');return;}
+  try{
+    const {error}=await supabaseClient.auth.resetPasswordForEmail(email,{redirectTo:window.location.href});
+    if(error)throw error;
+    showToast('Password reset email sent.','success');
+  }catch(err){
+    showToast(err?.message||'Password reset failed.','error');
+  }
+}
+async function signOutCloud(){
+  if(!supabaseClient)return;
+  try{
+    const {error}=await supabaseClient.auth.signOut();
+    if(error)throw error;
+    showToast('Signed out of cloud account.','');
+  }catch(err){
+    showToast(err?.message||'Could not sign out.','error');
+  }
+}
+function scheduleCloudSave(){
+  if(!supabaseClient||!cloudUser||isApplyingCloudState)return;
+  clearTimeout(cloudSaveTimer);
+  cloudSaveTimer=setTimeout(()=>{syncNowToCloud(true);},CLOUD_SYNC_DEBOUNCE_MS);
+}
+async function fetchCloudSnapshot(){
+  if(!supabaseClient||!cloudUser)return null;
+  const {data,error}=await supabaseClient
+    .from(CLOUD_STATE_TABLE)
+    .select('app_state,updated_at')
+    .eq('user_id',cloudUser.id)
+    .maybeSingle();
+  if(error)throw error;
+  return data||null;
+}
+function applyCloudSnapshot(cloudRaw){
+  if(!cloudRaw||typeof cloudRaw!=='object')return false;
+  const migrated=normalizeImportedState(cloudRaw);
+  isApplyingCloudState=true;
+  try{
+    state=migrated;
+    ensureStateDefaults();
+    setMatchPointsInput();
+    renderAll();
+  }finally{
+    isApplyingCloudState=false;
+  }
+  return true;
+}
+async function maybeLoadCloudOnSignIn(){
+  if(!supabaseClient||!cloudUser)return;
+  let snap=null;
+  try{
+    snap=await fetchCloudSnapshot();
+  }catch(err){
+    setCloudStatusText(err?.message||'Could not fetch cloud data.','var(--red)');
+    return;
+  }
+  if(!snap?.app_state){
+    if(countSavedItems(state)>0){
+      await syncNowToCloud(true);
+      setCloudStatusText('No cloud save existed, so your local data was uploaded.');
+      updateCloudAuthUI();
+    }
+    return;
+  }
+  const hasLocal=countSavedItems(state)>0;
+  const localScore=countSavedItems(state);
+  const cloudScore=countSavedItems(snap.app_state);
+  const shouldAutoLoad=!hasLocal||cloudScore>localScore;
+  if(shouldAutoLoad){
+    applyCloudSnapshot(snap.app_state);
+    cloudLastSyncAt=snap.updated_at||'';
+    showToast('Cloud data loaded for this account.','success');
+    updateCloudAuthUI();
+    return;
+  }
+  setCloudStatusText('Cloud data exists. Use "Download Cloud Data" if you want to replace local data.');
+  updateCloudAuthUI();
+}
+async function downloadCloudState(){
+  if(!supabaseClient||!cloudUser){showToast('Sign in first to download cloud data.','error');return;}
+  try{
+    const snap=await fetchCloudSnapshot();
+    if(!snap?.app_state){showToast('No cloud save found yet for this account.','');return;}
+    if(countSavedItems(state)>0&&!confirm('Replace current local data with cloud data?'))return;
+    applyCloudSnapshot(snap.app_state);
+    cloudLastSyncAt=snap.updated_at||'';
+    updateCloudAuthUI();
+    showToast('Cloud data downloaded.','success');
+  }catch(err){
+    showToast(err?.message||'Cloud download failed.','error');
+  }
+}
+async function syncNowToCloud(isAuto=false){
+  if(!supabaseClient||!cloudUser)return;
+  if(cloudSyncInFlight)return;
+  cloudSyncInFlight=true;
+  try{
+    const nowIso=new Date().toISOString();
+    const payload=JSON.parse(JSON.stringify(state));
+    const {error}=await supabaseClient
+      .from(CLOUD_STATE_TABLE)
+      .upsert({user_id:cloudUser.id,app_state:payload,updated_at:nowIso},{onConflict:'user_id'});
+    if(error)throw error;
+    cloudLastSyncAt=nowIso;
+    localStorage.setItem(CLOUD_USER_KEY,cloudUser.id);
+    updateCloudAuthUI();
+    if(!isAuto)showToast('Cloud sync complete.','success');
+  }catch(err){
+    if(!isAuto)showToast(err?.message||'Cloud sync failed.','error');
+    setCloudStatusText(err?.message||'Cloud sync failed.','var(--red)');
+  }finally{
+    cloudSyncInFlight=false;
+  }
+}
+async function initCloudSync(){
+  if(!canUseCloudSync()){
+    updateCloudAuthUI();
+    return;
+  }
+  supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{
+    auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
+  });
+  try{
+    const {data:{session}}=await supabaseClient.auth.getSession();
+    cloudUser=session?.user||null;
+    if(cloudUser){
+      localStorage.setItem(CLOUD_USER_KEY,cloudUser.id);
+      await maybeLoadCloudOnSignIn();
+    }
+  }catch(err){
+    setCloudStatusText(err?.message||'Could not initialize cloud session.','var(--red)');
+  }
+  updateCloudAuthUI();
+  supabaseClient.auth.onAuthStateChange(async (event,session)=>{
+    cloudUser=session?.user||null;
+    if(!cloudUser){
+      localStorage.removeItem(CLOUD_USER_KEY);
+      cloudLastSyncAt='';
+    }else{
+      localStorage.setItem(CLOUD_USER_KEY,cloudUser.id);
+      if(event==='SIGNED_IN'||event==='INITIAL_SESSION'){
+        await maybeLoadCloudOnSignIn();
+      }
+    }
+    updateCloudAuthUI();
+  });
+}
+async function init(){
+  try{const s=localStorage.getItem(LOCAL_STATE_KEY);if(s){const p=JSON.parse(s);if(p?.players){state=p;}}}catch(e){}
   loadFeaturePrefs();
   ensureStateDefaults();
   applyAppearance();
@@ -2231,6 +2523,7 @@ function init(){
   setAppearanceInputs();
   updateDailyGoalStatus();
   renderAll();
+  await initCloudSync();
 }
 
 function renderColorSwatches(cid,onSelect,isEdit=false){
@@ -2267,7 +2560,13 @@ function loadFeaturePrefs(){
     }
   }catch(e){}
 }
-function saveState(){try{localStorage.setItem('rankmaster_pro_state',JSON.stringify(state));saveFeaturePrefs();}catch(e){}}
+function saveState(opts={}){
+  try{
+    localStorage.setItem(LOCAL_STATE_KEY,JSON.stringify(state));
+    saveFeaturePrefs();
+    if(!opts.skipCloud&&!isApplyingCloudState)scheduleCloudSave();
+  }catch(e){}
+}
 
 function renderAll(){
   ensureStateDefaults();
