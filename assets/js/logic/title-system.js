@@ -1,4 +1,14 @@
-﻿// ===================== TITLE SYSTEM =====================
+﻿/*
+LEARNING FILE CARD
+File: assets/js/logic\title-system.js
+Purpose:
+- General app script.
+Tips for new developers:
+- This file runs in global browser scope (no import/export modules yet).
+- Keep function names descriptive and side effects intentional.
+- After state changes, most flows should end in renderAll().
+*/
+// ===================== TITLE SYSTEM =====================
 function getTitle(rating){
   return TITLES.find(t=>rating>=t.min)||TITLES[TITLES.length-1];
 }
@@ -39,4 +49,5 @@ function creatorBadgesHTML(compact=false){
   if(compact)return `<span class="creator-badge">👑 Creator</span>`;
   return `<span class="creator-badge">👑 App Creator</span><span class="creator-badge">⚡ Original Builder</span>`;
 }
+
 

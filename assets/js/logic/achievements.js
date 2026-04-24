@@ -1,4 +1,14 @@
-﻿// ===================== ACHIEVEMENTS =====================
+﻿/*
+LEARNING FILE CARD
+File: assets/js/logic\achievements.js
+Purpose:
+- General app script.
+Tips for new developers:
+- This file runs in global browser scope (no import/export modules yet).
+- Keep function names descriptive and side effects intentional.
+- After state changes, most flows should end in renderAll().
+*/
+// ===================== ACHIEVEMENTS =====================
 function computeAchievements(playerId){
   const p=state.players.find(x=>x.id===playerId);if(!p)return[];
   const ms=state.history.filter(h=>(h.p1id===playerId||h.p2id===playerId)&&!h.manualAdjust);
@@ -118,4 +128,5 @@ function selectNextAchievementPlayer(step){
   sel.selectedIndex=idx;
   renderAchievementsTab();
 }
+
 

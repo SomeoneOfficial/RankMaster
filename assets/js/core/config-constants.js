@@ -1,4 +1,14 @@
 ﻿/*
+LEARNING FILE CARD
+File: assets/js/core\config-constants.js
+Purpose:
+- General app script.
+Tips for new developers:
+- This file runs in global browser scope (no import/export modules yet).
+- Keep function names descriptive and side effects intentional.
+- After state changes, most flows should end in renderAll().
+*/
+/*
 BEGINNER MAP (read this first)
 1) Constants + Config: global options, colors, feature flags, cloud config.
 2) Core State: one object called "state" stores app data (players, history, settings).
@@ -89,6 +99,11 @@ const MILESTONES=[
   {key:'wins',val:100,msg:'100 Wins!',sub:'CENTURY! '},
 ];
 
+/*
+Feature toggle catalog:
+- Add new entries here when introducing user-facing toggles.
+- `id` should stay stable forever because saved state uses it.
+*/
 const CORE_FEATURE_TOGGLES=[
   {id:'ft_hot_streak_fx',name:'Hot Streak FX',desc:'Stronger visual highlight for streaks.',group:'core'},
   {id:'ft_win_sound',name:'Win Sound Cue',desc:'Optional future sound hook.',group:'core'},
@@ -119,6 +134,8 @@ const CORE_FEATURE_TOGGLES=[
 ];
 const FEATURE_TOGGLES=[...CORE_FEATURE_TOGGLES];
 const VISUAL_FEATURE_IDS=new Set(['ft_focus_mode','ft_compact_history','ft_colorful_badges','ft_bold_titles','ft_cinematic_mode','ft_feature_party','ft_hot_streak_fx']);
+// Default-on toggles for first-time users.
+const FEATURE_DEFAULTS={ft_live_h2h:true,ft_colorful_badges:true,ft_auto_clear_scores:true};
 const LOCAL_STATE_KEY='rankmaster_pro_state';
 const FEATURE_PREFS_KEY='rankmaster_pro_feature_prefs';
 const CLOUD_USER_KEY='rankmaster_cloud_user';
@@ -155,4 +172,5 @@ Core data model for beginners:
 - tournament: active tournament runtime object (or null)
 - settings fields: matchPoints/theme/density/etc.
 */
+
 

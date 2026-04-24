@@ -1,4 +1,14 @@
-﻿function createInitialState(){
+﻿/*
+LEARNING FILE CARD
+File: assets/js/core\runtime-state.js
+Purpose:
+- General app script.
+Tips for new developers:
+- This file runs in global browser scope (no import/export modules yet).
+- Keep function names descriptive and side effects intentional.
+- After state changes, most flows should end in renderAll().
+*/
+function createInitialState(){
   return{
     players:[],
     history:[],
@@ -48,11 +58,12 @@ function ensureStateDefaults(){
   if(state.boldText===undefined)state.boldText=false;
   if(state.mobileLock===undefined)state.mobileLock=true;
   if(!state.featureFlags)state.featureFlags={};
-  const defaults={ft_live_h2h:true,ft_colorful_badges:true,ft_auto_clear_scores:true};
-  FEATURE_TOGGLES.forEach(f=>{if(state.featureFlags[f.id]===undefined)state.featureFlags[f.id]=!!defaults[f.id];});
+  // Initialize flags for both built-in and newly registered feature toggles.
+  seedFeatureDefaults(state.featureFlags);
   if(!state.dailyGoal||isNaN(state.dailyGoal))state.dailyGoal=5;
   const today=new Date().toISOString().slice(0,10);
   if(!state.dailyDate){state.dailyDate=today;state.dailyCount=0;}
   if(state.dailyDate!==today){state.dailyDate=today;state.dailyCount=0;}
 }
+
 

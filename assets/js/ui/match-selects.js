@@ -1,4 +1,14 @@
-﻿// ===================== MATCH SELECTS =====================
+﻿/*
+LEARNING FILE CARD
+File: assets/js/ui\match-selects.js
+Purpose:
+- General app script.
+Tips for new developers:
+- This file runs in global browser scope (no import/export modules yet).
+- Keep function names descriptive and side effects intentional.
+- After state changes, most flows should end in renderAll().
+*/
+// ===================== MATCH SELECTS =====================
 function renderMatchSelects(){
   ['p1-select','p2-select'].forEach(id=>{
     const sel=document.getElementById(id);if(!sel)return;
@@ -9,4 +19,5 @@ function renderMatchSelects(){
   });
   onPlayerSelect();
 }
+
 

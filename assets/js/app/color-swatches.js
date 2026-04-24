@@ -1,4 +1,14 @@
-﻿function renderColorSwatches(cid,onSelect,isEdit=false){
+﻿/*
+LEARNING FILE CARD
+File: assets/js/app\color-swatches.js
+Purpose:
+- General app script.
+Tips for new developers:
+- This file runs in global browser scope (no import/export modules yet).
+- Keep function names descriptive and side effects intentional.
+- After state changes, most flows should end in renderAll().
+*/
+function renderColorSwatches(cid,onSelect,isEdit=false){
   const w=document.getElementById(cid);if(!w)return;w.innerHTML='';
   COLORS.forEach(c=>{
     const s=document.createElement('div');
@@ -12,4 +22,5 @@
   ci.onchange=e=>onSelect(e.target.value);
   cw.appendChild(ci);w.appendChild(cw);
 }
+
 

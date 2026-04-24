@@ -1,4 +1,14 @@
-﻿// ===================== PLAYERS CRUD =====================
+﻿/*
+LEARNING FILE CARD
+File: assets/js/ui\players-crud.js
+Purpose:
+- General app script.
+Tips for new developers:
+- This file runs in global browser scope (no import/export modules yet).
+- Keep function names descriptive and side effects intentional.
+- After state changes, most flows should end in renderAll().
+*/
+// ===================== PLAYERS CRUD =====================
 function addPlayer(){
   const name=document.getElementById('new-name').value.trim();
   const rating=parseInt(document.getElementById('new-rating').value)||1000;
@@ -43,4 +53,5 @@ function saveEdit(){
   p.color=editSelectedColor;
   closeModal('edit-modal');renderAll();showToast('Player updated! ','success');
 }
+
 

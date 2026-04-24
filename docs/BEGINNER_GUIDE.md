@@ -14,6 +14,7 @@ The app is split by responsibility:
 - `assets/js/ui/`: rendering and interaction handlers
 - `assets/js/tournaments/`: tournament systems by mode
 - `public/manifest.webmanifest` + `sw.js`: PWA setup
+- `docs/FEATURE_DEVELOPMENT_GUIDE.md`: exact checklist for adding new features
 
 ## 2) Most Important Concept: `state`
 
@@ -48,6 +49,7 @@ Most important path:
 - Local key: `rankmaster_pro_state`
 - Feature prefs key: `rankmaster_pro_feature_prefs`
 - Cloud config starts in `assets/js/core/config-constants.js`
+- Feature toggle helper API lives in `assets/js/core/feature-api.js`
 - Cloud sync is debounced and flushed on tab hide/unload
 
 Startup path:

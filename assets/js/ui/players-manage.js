@@ -1,4 +1,14 @@
-﻿// ===================== PLAYERS MANAGE LIST =====================
+﻿/*
+LEARNING FILE CARD
+File: assets/js/ui\players-manage.js
+Purpose:
+- General app script.
+Tips for new developers:
+- This file runs in global browser scope (no import/export modules yet).
+- Keep function names descriptive and side effects intentional.
+- After state changes, most flows should end in renderAll().
+*/
+// ===================== PLAYERS MANAGE LIST =====================
 function renderPlayersManageList(){
   const list=document.getElementById('players-manage-list');if(!list)return;
   if(!state.players.length){list.innerHTML='<div style="color:var(--muted);font-size:.82rem;text-align:center;padding:12px">No players yet</div>';return;}
@@ -21,4 +31,5 @@ function renderPlayersManageList(){
     </div>`;
   }).join('');
 }
+
 

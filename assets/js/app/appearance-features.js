@@ -1,4 +1,14 @@
-﻿function applyFeatureEffects(){
+﻿/*
+LEARNING FILE CARD
+File: assets/js/app\appearance-features.js
+Purpose:
+- General app script.
+Tips for new developers:
+- This file runs in global browser scope (no import/export modules yet).
+- Keep function names descriptive and side effects intentional.
+- After state changes, most flows should end in renderAll().
+*/
+function applyFeatureEffects(){
   document.body.classList.toggle('focus-mode',!!state.featureFlags?.ft_focus_mode);
   document.body.classList.toggle('compact-history',!!state.featureFlags?.ft_compact_history);
   document.body.classList.toggle('colorful-badges',!!state.featureFlags?.ft_colorful_badges);
@@ -159,4 +169,5 @@ function setFeatureFlag(id,val){
   const f=FEATURE_TOGGLES.find(x=>x.id===id);
   if(f)showToast(`${val?'Enabled':'Disabled'}: ${f.name} ${val?'✅':'⭕'}`,'');
 }
+
 

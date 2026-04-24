@@ -1,4 +1,14 @@
-﻿// ===================== ALGORITHM =====================
+﻿/*
+LEARNING FILE CARD
+File: assets/js/logic\elo-algorithm.js
+Purpose:
+- General app script.
+Tips for new developers:
+- This file runs in global browser scope (no import/export modules yet).
+- Keep function names descriptive and side effects intentional.
+- After state changes, most flows should end in renderAll().
+*/
+// ===================== ALGORITHM =====================
 function parseScore(s){if(!s&&s!==0)return null;const n=parseFloat(String(s).replace(/[^0-9.]/g,''));return isNaN(n)?null:n;}
 function didP1WinMatch(h){
   const s1=parseScore(h?.p1score),s2=parseScore(h?.p2score);
@@ -55,4 +65,5 @@ function offlineAlgorithm(p1,p2,p1scoreStr,p2scoreStr,p1lh,p2lh,multiplierOverri
   }
   return{p1_delta:p1d,p2_delta:p2d,reasoning:reasoning.trim()};
 }
+
 

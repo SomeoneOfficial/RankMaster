@@ -1,4 +1,14 @@
-﻿// ===================== SETTINGS =====================
+﻿/*
+LEARNING FILE CARD
+File: assets/js/ui\settings.js
+Purpose:
+- General app script.
+Tips for new developers:
+- This file runs in global browser scope (no import/export modules yet).
+- Keep function names descriptive and side effects intentional.
+- After state changes, most flows should end in renderAll().
+*/
+// ===================== SETTINGS =====================
 function deleteHistory(){if(!confirm('Delete ALL history? Ratings unchanged.'))return;state.history=[];renderAll();showToast('History deleted. 🧹','');}
 function resetAllRatings(){if(!confirm('Reset ALL ratings to 1000?'))return;state.players.forEach(p=>{p.rating=1000;p.wins=0;p.losses=0;});renderAll();showToast('Ratings reset. 🔄','');}
 function fullReset(){if(!confirm('FULL RESET  wipe everything?'))return;state=createInitialState();ensureStateDefaults();setMatchPointsInput();renderAll();showToast('Fresh start! ✨','');}
@@ -15,4 +25,5 @@ function switchSettingsTab(name){
   if(currentSettingsPane==='features')renderFeaturesCatalog();
   if(currentSettingsPane==='appearance')renderAppearanceFeatureGrid();
 }
+
 

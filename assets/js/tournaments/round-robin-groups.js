@@ -1,4 +1,14 @@
-﻿// ===================== RR GROUPS =====================
+﻿/*
+LEARNING FILE CARD
+File: assets/js/tournaments\round-robin-groups.js
+Purpose:
+- General app script.
+Tips for new developers:
+- This file runs in global browser scope (no import/export modules yet).
+- Keep function names descriptive and side effects intentional.
+- After state changes, most flows should end in renderAll().
+*/
+// ===================== RR GROUPS =====================
 function startRRGroups(players,settings){
   const shuffled=[...players].sort(()=>Math.random()-.5);
   const g=settings.groups,groups=Array.from({length:g},()=>[]);
@@ -74,4 +84,5 @@ function recordGroupMatch(gi,p1id,p2id,result){
   }
   closeModal('tmatch-modal');renderAll();showToast('Match recorded! ✅','success');
 }
+
 

@@ -1,4 +1,14 @@
-﻿// ===================== SPINNER =====================
+﻿/*
+LEARNING FILE CARD
+File: assets/js/ui\spinner.js
+Purpose:
+- General app script.
+Tips for new developers:
+- This file runs in global browser scope (no import/export modules yet).
+- Keep function names descriptive and side effects intentional.
+- After state changes, most flows should end in renderAll().
+*/
+// ===================== SPINNER =====================
 function openSpinner(){
   if(state.players.length<2){showToast('Need at least 2 players!','error');return;}
   spinP1=null;spinP2=null;
@@ -33,4 +43,5 @@ function useSpinResult(){
     showToast(`${spinP1.name} vs ${spinP2.name}  let's go! `,'success');
   },100);
 }
+
 

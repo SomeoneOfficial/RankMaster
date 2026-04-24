@@ -10,6 +10,7 @@ This app is organized into domain folders so each file has one clear job.
 
 ### Core (`assets/js/core/`)
 - `config-constants.js`: Global constants, achievements definitions, feature flags, cloud config helpers.
+- `feature-api.js`: Helper API to register new feature toggles and seed default flag values.
 - `runtime-state.js`: `createInitialState()`, runtime globals, `ensureStateDefaults()`.
 
 ### Logic (`assets/js/logic/`)
@@ -55,4 +56,5 @@ This app is organized into domain folders so each file has one clear job.
 
 ## Docs
 - `docs/BEGINNER_GUIDE.md`
+- `docs/FEATURE_DEVELOPMENT_GUIDE.md`
 - `docs/pwa-manifest-notes.txt`

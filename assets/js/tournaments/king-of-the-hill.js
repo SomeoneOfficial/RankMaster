@@ -1,4 +1,14 @@
-﻿// ===================== KING OF THE HILL =====================
+﻿/*
+LEARNING FILE CARD
+File: assets/js/tournaments\king-of-the-hill.js
+Purpose:
+- General app script.
+Tips for new developers:
+- This file runs in global browser scope (no import/export modules yet).
+- Keep function names descriptive and side effects intentional.
+- After state changes, most flows should end in renderAll().
+*/
+// ===================== KING OF THE HILL =====================
 function startKoth(players,settings){
   const sorted=[...players].sort((a,b)=>b.rating-a.rating);
   const king=sorted[0];
@@ -99,4 +109,5 @@ function recordKothChallenge(challengerId,winner){
 }
 
 function endTournament(){if(!confirm('End tournament?'))return;state.tournament=null;renderAll();showToast('Tournament ended. 🏁','');}
+
 

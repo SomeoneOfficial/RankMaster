@@ -1,4 +1,14 @@
-﻿function saveFeaturePrefs(){
+﻿/*
+LEARNING FILE CARD
+File: assets/js/app\persistence-render.js
+Purpose:
+- General app script.
+Tips for new developers:
+- This file runs in global browser scope (no import/export modules yet).
+- Keep function names descriptive and side effects intentional.
+- After state changes, most flows should end in renderAll().
+*/
+function saveFeaturePrefs(){
   try{
     const prefs={featureFlags:state.featureFlags||{},currentFeatureType:currentFeatureType||'core'};
     localStorage.setItem(FEATURE_PREFS_KEY,JSON.stringify(prefs));
@@ -48,4 +58,5 @@ function renderAll(){
   if(document.getElementById('tab-settings').style.display!=='none')renderFeaturesCatalog();
   saveState();
 }
+
 

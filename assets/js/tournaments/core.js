@@ -1,4 +1,14 @@
-﻿// ===================== TOURNAMENT =====================
+﻿/*
+LEARNING FILE CARD
+File: assets/js/tournaments\core.js
+Purpose:
+- General app script.
+Tips for new developers:
+- This file runs in global browser scope (no import/export modules yet).
+- Keep function names descriptive and side effects intentional.
+- After state changes, most flows should end in renderAll().
+*/
+// ===================== TOURNAMENT =====================
 function renderTournamentTab(){
   const home=document.getElementById('tournament-home');
   if(!state.tournament){renderTournamentSetup(home);return;}
@@ -107,4 +117,5 @@ function startTournament(){
     case'koth':startKoth(players,s);break;
   }
 }
+
 

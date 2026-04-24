@@ -1,4 +1,14 @@
-﻿// ===================== PROFILE =====================
+﻿/*
+LEARNING FILE CARD
+File: assets/js/ui\profile.js
+Purpose:
+- General app script.
+Tips for new developers:
+- This file runs in global browser scope (no import/export modules yet).
+- Keep function names descriptive and side effects intentional.
+- After state changes, most flows should end in renderAll().
+*/
+// ===================== PROFILE =====================
 function openProfile(id){
   const p=state.players.find(x=>x.id===id);if(!p)return;
   const creator=isCreatorPlayer(p);
@@ -65,4 +75,5 @@ function openProfile(id){
   document.getElementById('profile-modal').classList.add('show');
   setTimeout(()=>drawRatingGraph(id,`profile-graph-${id}`),60);
 }
+
 

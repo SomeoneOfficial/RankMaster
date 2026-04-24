@@ -1,4 +1,14 @@
-﻿// ===================== ROUND ROBIN =====================
+﻿/*
+LEARNING FILE CARD
+File: assets/js/tournaments\round-robin.js
+Purpose:
+- General app script.
+Tips for new developers:
+- This file runs in global browser scope (no import/export modules yet).
+- Keep function names descriptive and side effects intentional.
+- After state changes, most flows should end in renderAll().
+*/
+// ===================== ROUND ROBIN =====================
 function startRoundRobin(players,settings){
   const results={};
   players.forEach(p=>{results[p.id]={};players.forEach(q=>{if(p.id!==q.id)results[p.id][q.id]=null;});});
@@ -85,4 +95,5 @@ function recordRR(p1id,p2id,result){
   }
   closeModal('tmatch-modal');renderAll();showToast('Match recorded! ✅','success');
 }
+
 

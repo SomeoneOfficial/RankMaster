@@ -1,4 +1,14 @@
-﻿// ===================== DOUBLE ELIMINATION =====================
+﻿/*
+LEARNING FILE CARD
+File: assets/js/tournaments\double-elimination.js
+Purpose:
+- General app script.
+Tips for new developers:
+- This file runs in global browser scope (no import/export modules yet).
+- Keep function names descriptive and side effects intentional.
+- After state changes, most flows should end in renderAll().
+*/
+// ===================== DOUBLE ELIMINATION =====================
 function startDoubleElimination(players,settings){
   // Simple double-elim: winners bracket + losers get one more chance
   const seeded=[...players].sort((a,b)=>b.rating-a.rating);
@@ -108,4 +118,5 @@ function confirmDEMatch(ri,matchId,wk){
   }
   renderAll();showToast(`${match.winner.name} advances!`,'success');
 }
+
 

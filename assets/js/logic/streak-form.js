@@ -1,4 +1,14 @@
-﻿// ===================== STREAK + FORM =====================
+﻿/*
+LEARNING FILE CARD
+File: assets/js/logic\streak-form.js
+Purpose:
+- General app script.
+Tips for new developers:
+- This file runs in global browser scope (no import/export modules yet).
+- Keep function names descriptive and side effects intentional.
+- After state changes, most flows should end in renderAll().
+*/
+// ===================== STREAK + FORM =====================
 function getStreak(pid){
   const ms=state.history.filter(h=>(h.p1id===pid||h.p2id===pid)&&!h.manualAdjust);
   if(!ms.length)return null;
@@ -25,4 +35,5 @@ function formDotsHTML(pid){
   const d=getFormDots(pid);if(!d.length)return'';
   return'<div class="form-dots">'+d.map(x=>`<div class="form-dot ${x}"></div>`).join('')+'</div>';
 }
+
 

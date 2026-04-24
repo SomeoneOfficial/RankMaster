@@ -1,4 +1,14 @@
-﻿// ===================== MILESTONES =====================
+﻿/*
+LEARNING FILE CARD
+File: assets/js/logic\milestones.js
+Purpose:
+- General app script.
+Tips for new developers:
+- This file runs in global browser scope (no import/export modules yet).
+- Keep function names descriptive and side effects intentional.
+- After state changes, most flows should end in renderAll().
+*/
+// ===================== MILESTONES =====================
 function checkMilestones(player,oldRating,oldWins){
   MILESTONES.forEach(m=>{
     if(m.key==='rating'&&oldRating<m.val&&player.rating>=m.val)showMilestone('',m.msg,m.sub);
@@ -13,4 +23,5 @@ function showMilestone(icon,title,sub){
   t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),4000);
 }
+
 

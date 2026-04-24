@@ -1,4 +1,14 @@
-﻿// ===================== RATING GRAPH =====================
+﻿/*
+LEARNING FILE CARD
+File: assets/js/logic\rating-graph.js
+Purpose:
+- General app script.
+Tips for new developers:
+- This file runs in global browser scope (no import/export modules yet).
+- Keep function names descriptive and side effects intentional.
+- After state changes, most flows should end in renderAll().
+*/
+// ===================== RATING GRAPH =====================
 function drawRatingGraph(playerId,canvasId){
   const canvas=document.getElementById(canvasId);if(!canvas)return;
   const ctx=canvas.getContext('2d');
@@ -28,4 +38,5 @@ function drawRatingGraph(playerId,canvasId){
     ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(x,y,3,0,Math.PI*2);ctx.fill();
   });
 }
+
 

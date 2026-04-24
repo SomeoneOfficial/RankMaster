@@ -1,4 +1,14 @@
-﻿// ===================== PREDICTION =====================
+﻿/*
+LEARNING FILE CARD
+File: assets/js/logic\match-prediction.js
+Purpose:
+- General app script.
+Tips for new developers:
+- This file runs in global browser scope (no import/export modules yet).
+- Keep function names descriptive and side effects intentional.
+- After state changes, most flows should end in renderAll().
+*/
+// ===================== PREDICTION =====================
 function updatePrediction(){
   const p1id=parseInt(document.getElementById('p1-select').value);
   const p2id=parseInt(document.getElementById('p2-select').value);
@@ -128,4 +138,5 @@ function setWinnerButtonsDisabled(disabled){
   if(b1)b1.disabled=!!disabled;
   if(b2)b2.disabled=!!disabled;
 }
+
 

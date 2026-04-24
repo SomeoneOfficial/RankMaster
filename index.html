@@ -1,6 +1,10 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
+<!-- BEGINNER HEAD MAP
+     - meta: browser/device behavior
+     - manifest/icon: installable app metadata
+     - fonts/css: visual styling resources -->
 <meta charset="UTF-8">
 <meta name="viewport" id="viewport-meta" content="width=device-width, initial-scale=1.0">
 <title>RankMaster Pro</title>
@@ -20,6 +24,9 @@
 <!-- 6) toast overlays (temporary messages)                                  -->
 <!-- 7) scripts (app logic)                                                   -->
 <!-- ===================================================================== -->
+<!-- Naming tip for beginners:
+     - `id="..."` is used by JavaScript (`document.getElementById`) to read/update elements.
+     - `class="..."` is used mainly by CSS to style groups of elements. -->
 
 <!-- APP SHELL: wraps everything the user sees on screen -->
 <div class="app">
@@ -664,9 +671,16 @@
 
 <!-- External SDKs -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Script order matters:
+     1) Core state/constants
+     2) Logic helpers
+     3) App systems (save/sync/import)
+     4) UI and tournament handlers
+     5) Boot -->
 
 <!-- Core -->
 <script src="./assets/js/core/config-constants.js"></script>
+<script src="./assets/js/core/feature-api.js"></script>
 <script src="./assets/js/core/runtime-state.js"></script>
 
 <!-- Logic -->

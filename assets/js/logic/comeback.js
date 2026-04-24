@@ -1,4 +1,14 @@
-﻿// ===================== COMEBACK =====================
+﻿/*
+LEARNING FILE CARD
+File: assets/js/logic\comeback.js
+Purpose:
+- General app script.
+Tips for new developers:
+- This file runs in global browser scope (no import/export modules yet).
+- Keep function names descriptive and side effects intentional.
+- After state changes, most flows should end in renderAll().
+*/
+// ===================== COMEBACK =====================
 function getComeback(playerId){
   const ms=state.history.filter(h=>(h.p1id===playerId||h.p2id===playerId)&&!h.manualAdjust);
   if(!ms.length)return null;
@@ -13,4 +23,5 @@ function getComeback(playerId){
   if(!state.lowestRatings[playerId]||lowest<state.lowestRatings[playerId])state.lowestRatings[playerId]=lowest;
   return{comeback,lowest,current:p.rating};
 }
+
 

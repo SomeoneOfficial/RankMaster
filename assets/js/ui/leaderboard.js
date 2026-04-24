@@ -1,4 +1,14 @@
-﻿// ===================== LEADERBOARD =====================
+﻿/*
+LEARNING FILE CARD
+File: assets/js/ui\leaderboard.js
+Purpose:
+- General app script.
+Tips for new developers:
+- This file runs in global browser scope (no import/export modules yet).
+- Keep function names descriptive and side effects intentional.
+- After state changes, most flows should end in renderAll().
+*/
+// ===================== LEADERBOARD =====================
 function renderLeaderboard(){
   const list=document.getElementById('leaderboard-list');
   if(!state.players.length){
@@ -44,4 +54,5 @@ function renderLeaderboard(){
     </div>`;
   }).join('');
 }
+
 

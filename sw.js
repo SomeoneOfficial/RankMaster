@@ -1,4 +1,12 @@
-﻿const CACHE_NAME = 'TableTennisRatings-v4';
+﻿/*
+LEARNING FILE CARD
+File: sw.js
+Purpose:
+- Caches app files for offline reliability and faster repeat loads.
+- Intercepts fetch requests and serves cache-first for static assets.
+*/
+
+const CACHE_NAME = 'TableTennisRatings-v5';
 const urlsToCache = [
   './',
   './index.html',
@@ -7,6 +15,7 @@ const urlsToCache = [
   './public/icons/icon-512x512.png',
   './assets/css/app.css',
   './assets/js/core/config-constants.js',
+  './assets/js/core/feature-api.js',
   './assets/js/core/runtime-state.js',
   './assets/js/logic/level-system.js',
   './assets/js/logic/title-system.js',
@@ -108,5 +117,7 @@ self.addEventListener('fetch', event => {
     })
   );
 });
+
+
 
 

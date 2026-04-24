@@ -1,4 +1,14 @@
-﻿// ===================== LADDER =====================
+﻿/*
+LEARNING FILE CARD
+File: assets/js/tournaments\ladder.js
+Purpose:
+- General app script.
+Tips for new developers:
+- This file runs in global browser scope (no import/export modules yet).
+- Keep function names descriptive and side effects intentional.
+- After state changes, most flows should end in renderAll().
+*/
+// ===================== LADDER =====================
 function startLadder(players,settings){
   const sorted=[...players].sort((a,b)=>b.rating-a.rating);
   state.tournament={format:'ladder',ladder:sorted.map(p=>p.id),settings,challenges:[],completed:false};
@@ -83,4 +93,5 @@ function recordLadderChallenge(chId,defId,winner){
   t.challenges.push({winner:winner==='challenger'?ch.name:def.name,loser:winner==='challenger'?def.name:ch.name,scoreStr:`${p1sc||'?'}${p2sc||'?'}`});
   closeModal('challenge-modal');renderAll();
 }
+
 

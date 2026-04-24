@@ -1,4 +1,14 @@
-﻿// ===================== SERIES =====================
+﻿/*
+LEARNING FILE CARD
+File: assets/js/logic\series-engine.js
+Purpose:
+- General app script.
+Tips for new developers:
+- This file runs in global browser scope (no import/export modules yet).
+- Keep function names descriptive and side effects intentional.
+- After state changes, most flows should end in renderAll().
+*/
+// ===================== SERIES =====================
 function setSeries(n){
   currentSeries=n;
   document.querySelectorAll('.series-opt').forEach(el=>el.classList.toggle('active',parseInt(el.dataset.series)===n));
@@ -375,4 +385,5 @@ function applyChanges(opts){
     renderAll();
   }
 }
+
 

@@ -1,4 +1,14 @@
-﻿function normalizeImportedState(raw){
+﻿/*
+LEARNING FILE CARD
+File: assets/js/app\import-migrator.js
+Purpose:
+- General app script.
+Tips for new developers:
+- This file runs in global browser scope (no import/export modules yet).
+- Keep function names descriptive and side effects intentional.
+- After state changes, most flows should end in renderAll().
+*/
+function normalizeImportedState(raw){
   const out=raw&&typeof raw==='object'?JSON.parse(JSON.stringify(raw)):{};
   if(!Array.isArray(out.players))out.players=[];
   if(!Array.isArray(out.history))out.history=[];
@@ -122,4 +132,5 @@ function applyMigratedJson(){
     showToast('Could not apply migrated JSON.','error');
   }
 }
+
 

@@ -1,4 +1,14 @@
-﻿// ===================== RIVAL =====================
+﻿/*
+LEARNING FILE CARD
+File: assets/js/logic\rivalry.js
+Purpose:
+- General app script.
+Tips for new developers:
+- This file runs in global browser scope (no import/export modules yet).
+- Keep function names descriptive and side effects intentional.
+- After state changes, most flows should end in renderAll().
+*/
+// ===================== RIVAL =====================
 function getRival(playerId){
   const matches=state.history.filter(h=>(h.p1id===playerId||h.p2id===playerId)&&!h.manualAdjust);
   const oppCount={};
@@ -14,4 +24,5 @@ function getRival(playerId){
   if(!sorted.length||sorted[0][1].count<2)return null;
   return {...sorted[0][1],id:parseInt(sorted[0][0])};
 }
+
 

@@ -1,4 +1,14 @@
-﻿// ===================== SINGLE ELIMINATION =====================
+﻿/*
+LEARNING FILE CARD
+File: assets/js/tournaments\single-elimination.js
+Purpose:
+- General app script.
+Tips for new developers:
+- This file runs in global browser scope (no import/export modules yet).
+- Keep function names descriptive and side effects intentional.
+- After state changes, most flows should end in renderAll().
+*/
+// ===================== SINGLE ELIMINATION =====================
 function startElimination(players,settings){
   const seeded=[...players].sort((a,b)=>b.rating-a.rating);
   const size=Math.pow(2,Math.ceil(Math.log2(Math.max(seeded.length,2))));
@@ -102,4 +112,5 @@ function confirmElimMatch(ri,matchId,wk){
   }
   renderAll();showToast(`${match.winner.name} advances! `,'success');
 }
+
 

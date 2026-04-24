@@ -1,4 +1,14 @@
-﻿// ===================== INIT =====================
+﻿/*
+LEARNING FILE CARD
+File: assets/js/app\cloud-sync.js
+Purpose:
+- General app script.
+Tips for new developers:
+- This file runs in global browser scope (no import/export modules yet).
+- Keep function names descriptive and side effects intentional.
+- After state changes, most flows should end in renderAll().
+*/
+// ===================== INIT =====================
 function canUseCloudSync(){
   return !!(window.supabase&&typeof window.supabase.createClient==='function'&&SUPABASE_URL&&SUPABASE_PUBLISHABLE_KEY);
 }
@@ -316,4 +326,5 @@ async function initCloudSync(){
 // 2) Normalize defaults
 // 3) Render UI
 // 4) Connect cloud sync/auth
+
 

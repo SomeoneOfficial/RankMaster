@@ -1,4 +1,14 @@
-﻿// ===================== MANUAL ADJUST =====================
+﻿/*
+LEARNING FILE CARD
+File: assets/js/ui\manual-adjust.js
+Purpose:
+- General app script.
+Tips for new developers:
+- This file runs in global browser scope (no import/export modules yet).
+- Keep function names descriptive and side effects intentional.
+- After state changes, most flows should end in renderAll().
+*/
+// ===================== MANUAL ADJUST =====================
 function openManualAdjustModal(){
   const sel=document.getElementById('adjust-player-select');
   sel.innerHTML=state.players.map(p=>`<option value="${p.id}">${p.name} (${p.rating})</option>`).join('');
@@ -86,4 +96,5 @@ function saveCreatorEmoji(){
   renderAll();
   showToast(emoji?'Creator emoji saved.':'Creator emoji cleared.','success');
 }
+
 
