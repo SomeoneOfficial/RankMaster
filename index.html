@@ -6,6 +6,12 @@
 <title>RankMaster Pro</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
+/* BEGINNER CSS MAP
+   1) Theme tokens (:root + body.theme-*)
+   2) Layout primitives (app/header/cards/buttons/tabs)
+   3) Feature sections (leaderboard/match/history/settings/tournament/modals)
+   4) Utility states (.show/.active/.compact/etc.)
+*/
 :root{
   --bg:#07070d;--surface:#0f0f1a;--surface2:#171726;--surface3:#1f1f32;
   --border:#252540;--border2:#333355;
@@ -1279,6 +1285,17 @@ body.feature-party .card-lg,body.feature-party .settings-section{box-shadow:0 0 
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+/*
+BEGINNER MAP (read this first)
+1) Constants + Config: global options, colors, feature flags, cloud config.
+2) Core State: one object called "state" stores app data (players, history, settings).
+3) Pure Logic: rating math, achievements, streaks, helpers.
+4) UI Render: functions that draw tabs/cards/lists from current state.
+5) Actions: add player, record winner, apply changes, tournament actions.
+6) Persistence: save/load local storage + cloud sync.
+7) Boot: init() loads data, renders UI, and sets up listeners.
+For a friendlier walkthrough, open BEGINNER_GUIDE.md in this repo.
+*/
 // ===================== CONSTANTS =====================
 const COLORS=['#f0c040','#e05a30','#3dd68c','#5ab4f0','#c07af0','#f05a8a','#40c0c0','#e09030','#90c040','#f06060','#f0a050','#70d0f0'];
 
@@ -1417,7 +1434,36 @@ function getSupabaseTableName(tableUrl){
 const SUPABASE_URL=getSupabaseProjectUrl(CLOUD_TABLE_URL);
 const CLOUD_STATE_TABLE=getSupabaseTableName(CLOUD_TABLE_URL);
 
-let state={players:[],history:[],nextId:1,tournament:null,achievements:{},lowestRatings:{},matchPoints:10,topRankEmoji:'🐦',theme:'neon',density:'comfort',dailyGoal:5,dailyDate:'',dailyCount:0,boldText:false,mobileLock:true,featureFlags:{}};
+/*
+Core data model for beginners:
+- players: list of tracked players and ratings
+- history: every saved match (manual adjust/tournament/series included)
+- nextId: incremental id source for new records
+- tournament: active tournament runtime object (or null)
+- settings fields: matchPoints/theme/density/etc.
+*/
+function createInitialState(){
+  return{
+    players:[],
+    history:[],
+    nextId:1,
+    tournament:null,
+    achievements:{},
+    lowestRatings:{},
+    matchPoints:10,
+    topRankEmoji:'🐦',
+    theme:'neon',
+    density:'comfort',
+    dailyGoal:5,
+    dailyDate:'',
+    dailyCount:0,
+    boldText:false,
+    mobileLock:true,
+    featureFlags:{}
+  };
+}
+
+let state=createInitialState();
 let selectedColor=COLORS[0], editSelectedColor=COLORS[0], editingId=null, pendingChanges=null;
 let selectedFormat='elimination', spinP1=null, spinP2=null;
 let currentSeries=1, seriesScores={p1:0,p2:0}, seriesGames=[], seriesActive=false;
@@ -1758,6 +1804,8 @@ function previewWinner(winner){
   computeAndShowResult(p1,p2,winner,p1sc,p2sc,false,null,false,true);
 }
 
+// Main match-entry action.
+// It validates user input, computes a pending result preview, and waits for applyChanges().
 function recordWinner(winner){
   if(winnerActionLock){showToast('Please wait a moment...','error');return;}
   winnerActionLock=true;
@@ -1974,6 +2022,8 @@ function undoLastMatch(){
   showToast('Last match undone. ↩️','success');
 }
 
+// Commit step: this is where pendingChanges become official.
+// Flow: mutate ratings -> append history -> update daily goal -> refresh UI -> persist local/cloud.
 function applyChanges(opts){
   if(!pendingChanges&&!opts){showToast('Pick a winner to create an official result first.','error');return;}
   const{p1,p2,p1delta,p2delta,reasoning,context,notes,p1lh,p2lh,tournamentMatch,seriesData,midSeries}=opts||pendingChanges;
@@ -2408,6 +2458,7 @@ function scheduleCloudSave(){
   clearTimeout(cloudSaveTimer);
   cloudSaveTimer=setTimeout(()=>{syncNowToCloud(true);},CLOUD_SYNC_DEBOUNCE_MS);
 }
+// Best-effort final sync used before refresh/close.
 function flushCloudSaveNow(){
   if(!supabaseClient||!cloudUser||isApplyingCloudState)return;
   if(cloudSaveTimer){
@@ -2440,6 +2491,8 @@ function applyCloudSnapshot(cloudRaw){
   }
   return true;
 }
+// Refresh behavior when authenticated:
+// always prefer cloud state if it exists; if cloud row is empty, upload local state once.
 async function maybeLoadCloudOnSignIn(){
   if(!supabaseClient||!cloudUser)return;
   let snap=null;
@@ -2536,6 +2589,11 @@ async function initCloudSync(){
   window.addEventListener('pagehide',flushCloudSaveNow);
   window.addEventListener('beforeunload',flushCloudSaveNow);
 }
+// App startup lifecycle:
+// 1) Load local cache
+// 2) Normalize defaults
+// 3) Render UI
+// 4) Connect cloud sync/auth
 async function init(){
   try{const s=localStorage.getItem(LOCAL_STATE_KEY);if(s){const p=JSON.parse(s);if(p?.players){state=p;}}}catch(e){}
   loadFeaturePrefs();
@@ -2584,6 +2642,8 @@ function loadFeaturePrefs(){
     }
   }catch(e){}
 }
+// Persist the single source of truth (`state`) to local storage,
+// then schedule cloud sync when signed in.
 function saveState(opts={}){
   try{
     localStorage.setItem(LOCAL_STATE_KEY,JSON.stringify(state));
@@ -2592,6 +2652,8 @@ function saveState(opts={}){
   }catch(e){}
 }
 
+// Central redraw entry point.
+// Any action that changes state should eventually call renderAll().
 function renderAll(){
   ensureStateDefaults();
   applyAppearance();
@@ -3262,10 +3324,9 @@ function saveCreatorEmoji(){
 // ===================== SETTINGS =====================
 function deleteHistory(){if(!confirm('Delete ALL history? Ratings unchanged.'))return;state.history=[];renderAll();showToast('History deleted. 🧹','');}
 function resetAllRatings(){if(!confirm('Reset ALL ratings to 1000?'))return;state.players.forEach(p=>{p.rating=1000;p.wins=0;p.losses=0;});renderAll();showToast('Ratings reset. 🔄','');}
-function fullReset(){if(!confirm('FULL RESET  wipe everything?'))return;state={players:[],history:[],nextId:1,tournament:null,achievements:{},lowestRatings:{},matchPoints:10,topRankEmoji:'🐦',theme:'neon',density:'comfort',dailyGoal:5,dailyDate:'',dailyCount:0,boldText:false,mobileLock:true,featureFlags:{}};ensureStateDefaults();setMatchPointsInput();renderAll();showToast('Fresh start! ✨','');}
+function fullReset(){if(!confirm('FULL RESET  wipe everything?'))return;state=createInitialState();ensureStateDefaults();setMatchPointsInput();renderAll();showToast('Fresh start! ✨','');}
 function downloadJSON(){const b=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='rankmaster-pro-data.json';a.click();showToast('Exported successfully. 📦','success');}
 function importJSON(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(d&&typeof d==='object'){state=normalizeImportedState(d);ensureStateDefaults();setMatchPointsInput();saveState();renderAll();showToast('Imported + migrated successfully. 🎉','success');}else showToast('Invalid file!','error');}catch{showToast("Couldn't read that file",'error');}};r.readAsText(f);e.target.value='';}
-function formatTime(d){return d.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' '+d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});}
 function switchSettingsTab(name){
   currentSettingsPane=name||'general';
   document.querySelectorAll('.settings-subtab').forEach(b=>b.classList.toggle('active',b.dataset.pane===currentSettingsPane));
