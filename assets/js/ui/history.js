@@ -41,8 +41,13 @@ function renderHistory(){
         ${h.notes?`<div style="font-size:.75rem;color:#8ac8f0;font-style:italic;margin-top:2px"> ${h.notes}</div>`:''}
       </div>
       <div class="changes">
-        <span class="badge ${h.p1delta>=0?'pos':'neg'}">${h.p1name}: ${h.p1delta>0?'+':''}${h.p1delta}</span>
-        <span class="badge ${h.p2delta>=0?'pos':'neg'}">${h.p2name}: ${h.p2delta>0?'+':''}${h.p2delta}</span>
+        <span class="badge ${h.p1delta>=0?'pos':'neg'}" style="font-size:20px;">
+          ${h.p1name}: ${h.p1delta>0?'+':''}${h.p1delta}
+        </span>
+
+        <span class="badge ${h.p2delta>=0?'pos':'neg'}" style="font-size:20px;">
+          ${h.p2name}: ${h.p2delta>0?'+':''}${h.p2delta}
+        </span>
       </div>
     </div>`).join('');
 }

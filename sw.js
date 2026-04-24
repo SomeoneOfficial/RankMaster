@@ -93,7 +93,23 @@ self.addEventListener('fetch', event => {
   // 2) Other requests (CSS, JS, images, etc.)
   event.respondWith(
     caches.match(event.request).then(cachedRes => {
-      if (cachedRes) return cachedRes;
+      if (cachedRes) {
+        // Stale-while-revalidate:
+        // return cached response immediately, then refresh cache from network when possible.
+        const refreshPromise = fetch(event.request)
+          .then(netRes => {
+            if (
+              netRes.ok &&
+              new URL(event.request.url).origin === self.location.origin
+            ) {
+              const clone = netRes.clone();
+              return caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+            }
+          })
+          .catch(() => null);
+        event.waitUntil(refreshPromise);
+        return cachedRes;
+      }
 
       return fetch(event.request)
         .then(netRes => {
