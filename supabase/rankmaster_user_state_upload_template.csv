@@ -1,0 +1,2 @@
+user_id,app_state,created_at,updated_at
+REPLACE_WITH_AUTH_USER_ID,"{""players"":[],""history"":[],""nextId"":1,""tournament"":null,""achievements"":{},""lowestRatings"":{},""matchPoints"":10,""topRankEmoji"":""bird"",""theme"":""neon"",""density"":""comfort"",""dailyGoal"":5,""dailyDate"":""2026-04-24"",""dailyCount"":0,""boldText"":false,""mobileLock"":true,""featureFlags"":{}}",2026-04-24T00:00:00Z,2026-04-24T00:00:00Z
