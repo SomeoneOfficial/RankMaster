@@ -1392,10 +1392,30 @@ const VISUAL_FEATURE_IDS=new Set(['ft_focus_mode','ft_compact_history','ft_color
 const LOCAL_STATE_KEY='rankmaster_pro_state';
 const FEATURE_PREFS_KEY='rankmaster_pro_feature_prefs';
 const CLOUD_USER_KEY='rankmaster_cloud_user';
-const CLOUD_STATE_TABLE='rankmaster_user_state';
-const SUPABASE_URL='https://wkoohtlkjmkeeirvlcah.supabase.co';
+const CLOUD_TABLE_URL='https://wkoohtlkjmkeeirvlcah.supabase.co/rankmaster_user_state';
 const SUPABASE_PUBLISHABLE_KEY='sb_publishable_ciEUksEWtbNcAx_gLJADxw_jcTjX8tS';
 const CLOUD_SYNC_DEBOUNCE_MS=1400;
+
+function getSupabaseProjectUrl(tableUrl){
+  try{
+    const u=new URL(tableUrl);
+    return `${u.protocol}//${u.host}`;
+  }catch(e){
+    return 'https://wkoohtlkjmkeeirvlcah.supabase.co';
+  }
+}
+function getSupabaseTableName(tableUrl){
+  try{
+    const u=new URL(tableUrl);
+    const parts=u.pathname.split('/').filter(Boolean);
+    if(parts[0]==='rest'&&parts[1]==='v1'&&parts[2])return parts[2];
+    return parts[parts.length-1]||'rankmaster_user_state';
+  }catch(e){
+    return 'rankmaster_user_state';
+  }
+}
+const SUPABASE_URL=getSupabaseProjectUrl(CLOUD_TABLE_URL);
+const CLOUD_STATE_TABLE=getSupabaseTableName(CLOUD_TABLE_URL);
 
 let state={players:[],history:[],nextId:1,tournament:null,achievements:{},lowestRatings:{},matchPoints:10,topRankEmoji:'🐦',theme:'neon',density:'comfort',dailyGoal:5,dailyDate:'',dailyCount:0,boldText:false,mobileLock:true,featureFlags:{}};
 let selectedColor=COLORS[0], editSelectedColor=COLORS[0], editingId=null, pendingChanges=null;
