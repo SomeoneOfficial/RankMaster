@@ -50,6 +50,21 @@ before update on public.rankmaster_user_state
 for each row
 execute function public.rankmaster_set_updated_at();
 
+-- Realtime: include this table in publication for live push/pull subscriptions.
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_publication_tables
+    where pubname = 'supabase_realtime'
+      and schemaname = 'public'
+      and tablename = 'rankmaster_user_state'
+  ) then
+    alter publication supabase_realtime add table public.rankmaster_user_state;
+  end if;
+end
+$$;
+
 -- Force PostgREST schema cache reload so the table becomes immediately available via API.
 select pg_notify('pgrst', 'reload schema');
 
