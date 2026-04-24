@@ -1,0 +1,9 @@
+﻿# Local backups and scratch folders
+archive/
+
+# Local IDE settings
+.vscode/
+
+# OS junk
+.DS_Store
+Thumbs.db

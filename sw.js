@@ -1,10 +1,49 @@
-const CACHE_NAME = 'TableTennisRatings';
+﻿const CACHE_NAME = 'TableTennisRatings-v4';
 const urlsToCache = [
   './',
   './index.html',
-  './manifest.json',
-  './icon-192x192.png',
-  './icon-512x512.png'
+  './public/manifest.webmanifest',
+  './public/icons/icon-192x192.png',
+  './public/icons/icon-512x512.png',
+  './assets/css/app.css',
+  './assets/js/core/config-constants.js',
+  './assets/js/core/runtime-state.js',
+  './assets/js/logic/level-system.js',
+  './assets/js/logic/title-system.js',
+  './assets/js/logic/elo-algorithm.js',
+  './assets/js/logic/match-prediction.js',
+  './assets/js/logic/series-engine.js',
+  './assets/js/logic/streak-form.js',
+  './assets/js/logic/rivalry.js',
+  './assets/js/logic/comeback.js',
+  './assets/js/logic/achievements.js',
+  './assets/js/logic/milestones.js',
+  './assets/js/logic/rating-graph.js',
+  './assets/js/app/import-migrator.js',
+  './assets/js/app/color-swatches.js',
+  './assets/js/app/appearance-features.js',
+  './assets/js/app/persistence-render.js',
+  './assets/js/app/cloud-sync.js',
+  './assets/js/app/bootstrap.js',
+  './assets/js/ui/leaderboard.js',
+  './assets/js/ui/players-manage.js',
+  './assets/js/ui/match-selects.js',
+  './assets/js/ui/history.js',
+  './assets/js/ui/players-crud.js',
+  './assets/js/ui/profile.js',
+  './assets/js/ui/spinner.js',
+  './assets/js/ui/manual-adjust.js',
+  './assets/js/ui/settings.js',
+  './assets/js/ui/tabs.js',
+  './assets/js/tournaments/core.js',
+  './assets/js/tournaments/single-elimination.js',
+  './assets/js/tournaments/double-elimination.js',
+  './assets/js/tournaments/round-robin.js',
+  './assets/js/tournaments/round-robin-groups.js',
+  './assets/js/tournaments/ladder.js',
+  './assets/js/tournaments/king-of-the-hill.js',
+  './assets/js/utils-boot.js',
+  './assets/js/service-worker-register.js'
 ];
 
 // Install: cache core assets
@@ -49,7 +88,7 @@ self.addEventListener('fetch', event => {
 
       return fetch(event.request)
         .then(netRes => {
-          // Only cache valid, same‑origin responses
+          // Only cache valid, same-origin responses
           if (
             netRes.ok &&
             new URL(event.request.url).origin === self.location.origin
@@ -69,3 +108,5 @@ self.addEventListener('fetch', event => {
     })
   );
 });
+
+
