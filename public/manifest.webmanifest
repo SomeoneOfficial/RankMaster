@@ -1,8 +1,8 @@
 {
-    "name": "TableTennisRatings",
-    "short_name": "Ratings",
-    "description": "TableTennisRatings",
-    "start_url": "/TableTennisRatings/",
+    "name": "RankMaster",
+    "short_name": "RankMaster",
+    "description": "RankMaster",
+    "start_url": "/RankMaster/",
     "display": "standalone",
     "background_color": "#000000",
     "theme_color": "#000000",
