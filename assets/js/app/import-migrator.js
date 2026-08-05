@@ -10,6 +10,10 @@ Tips for new developers:
 */
 function normalizeImportedState(raw){
   const out=raw&&typeof raw==='object'?JSON.parse(JSON.stringify(raw)):{};
+  // Legacy exports predate sport tracking. All historical matches were Table Tennis.
+  const defaultSports=[{id:'table-tennis',name:'Table Tennis',emoji:'🏓',scoring:'points',target:11,baseRating:1000},{id:'soccer',name:'Soccer',emoji:'⚽',scoring:'points',target:1,baseRating:1000},{id:'basketball',name:'Basketball',emoji:'🏀',scoring:'points',target:1,baseRating:1000},{id:'badminton',name:'Badminton',emoji:'🏸',scoring:'points',target:21,baseRating:1000}];
+  if(!Array.isArray(out.sports)||!out.sports.length)out.sports=defaultSports;
+  out.sports.forEach(s=>{if(typeof s.baseRating!=='number')s.baseRating=1000;});
   if(!Array.isArray(out.players))out.players=[];
   if(!Array.isArray(out.history))out.history=[];
   if(typeof out.nextId!=='number'||!isFinite(out.nextId)){
@@ -25,7 +29,8 @@ function normalizeImportedState(raw){
     avatarEmoji:normalizeCreatorEmojiInput(p.avatarEmoji||p.profileEmoji||p.emoji||p.creatorEmoji||''),
     creatorEmoji:normalizeCreatorEmojiInput(p.creatorEmoji||''),
     wins:parseInt(p.wins)||0,
-    losses:parseInt(p.losses)||0
+    losses:parseInt(p.losses)||0,
+    sportRatings:(p.sportRatings&&typeof p.sportRatings==='object')?{...p.sportRatings}:{'table-tennis':parseInt(p.rating)||1000}
   }));
   const byId={};
   const byName={};
@@ -44,7 +49,10 @@ function normalizeImportedState(raw){
     p1score:h.p1score??'',p2score:h.p2score??'',
     reasoning:String(h.reasoning||''),context:String(h.context||''),notes:String(h.notes||''),
     mode:h.mode||'offline',lhTag:h.lhTag||'',
-    manualAdjust:!!h.manualAdjust,tournamentMatch:!!h.tournamentMatch,seriesData:h.seriesData||null
+    manualAdjust:!!h.manualAdjust,tournamentMatch:!!h.tournamentMatch,seriesData:h.seriesData||null,
+    // Preserve explicit sport data from newer exports; otherwise migrate the old
+    // free-text match to Table Tennis because that is what the legacy data represents.
+    sportId:'table-tennis',scoringType:'points'
   })).map((h,i)=>{
     const p1nameKey=h.p1name.trim().toLowerCase();
     const p2nameKey=h.p2name.trim().toLowerCase();
@@ -59,6 +67,10 @@ function normalizeImportedState(raw){
   const maxHid=Math.max(0,...out.history.map(h=>parseInt(h.id)||0));
   out.nextId=Math.max(maxPid,maxHid)+1;
   out.players.forEach(p=>{p.wins=0;p.losses=0;});
+  out.players.forEach(p=>{
+    if(typeof p.sportRatings['table-tennis']!=='number')p.sportRatings['table-tennis']=p.rating||1000;
+    out.sports.forEach(s=>{p.sportRatings[s.id]=s.id==='table-tennis'?(p.rating||1000):(s.baseRating||1000);});
+  });
   out.history.forEach(h=>{
     if(h.manualAdjust)return;
     const p1=byId[h.p1id],p2=byId[h.p2id];

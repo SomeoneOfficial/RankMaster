@@ -18,12 +18,14 @@ function filterHistory(type,el){
 
 function renderHistory(){
   const list=document.getElementById('history-list');if(!list)return;
+  const sportFilters=document.getElementById('sport-history-filters');if(sportFilters)sportFilters.innerHTML=(state.sports||[]).filter(s=>s.id!=='table-tennis').map(s=>`<div class="filter-chip ${historyFilter===`sport:${s.id}`?'active':''}" onclick="filterHistory('sport:${s.id}',this)">${s.emoji} ${s.name}</div>`).join('');
   const search=(document.getElementById('history-search')?.value||'').toLowerCase();
   let items=state.history;
   if(historyFilter==='match')items=items.filter(h=>!h.tournamentMatch&&!h.manualAdjust&&!h.seriesData);
   else if(historyFilter==='tournament')items=items.filter(h=>h.tournamentMatch);
   else if(historyFilter==='series')items=items.filter(h=>h.seriesData);
   else if(historyFilter==='manual')items=items.filter(h=>h.manualAdjust);
+  else if(historyFilter.startsWith('sport:'))items=items.filter(h=>h.sportId===historyFilter.slice(6));
   if(search)items=items.filter(h=>h.p1name.toLowerCase().includes(search)||h.p2name.toLowerCase().includes(search));
   if(!items.length){list.innerHTML='<div class="empty-state"><div class="icon"></div><p>No matches found.</p></div>';return;}
   const ordered=state.featureFlags?.ft_history_oldest_first?[...items]:[...items].reverse();
@@ -36,6 +38,7 @@ function renderHistory(){
         ${h.manualAdjust?`<span class="badge neutral" style="margin-left:4px"> Manual</span>`:''}
         ${h.tournamentMatch?`<span class="badge series-badge" style="margin-left:4px"> Tour</span>`:''}
         ${h.seriesData?`<span class="badge series-badge" style="margin-left:4px"> Series ${h.seriesData.score}</span>`:''}
+        ${h.sportId?`<span class="badge neutral" style="margin-left:4px">${(state.sports||[]).find(s=>s.id===h.sportId)?.emoji||'🎯'} ${(state.sports||[]).find(s=>s.id===h.sportId)?.name||h.sportId}</span>`:''}
         </div>
         ${(h.p1score||h.p2score)?`<div style="font-size:.76rem;color:var(--muted);margin-top:2px">Score: ${h.p1name} ${h.p1score||'?'}  ${h.p2score||'?'} ${h.p2name}</div>`:''}
         ${h.notes?`<div style="font-size:.75rem;color:#8ac8f0;font-style:italic;margin-top:2px"> ${h.notes}</div>`:''}

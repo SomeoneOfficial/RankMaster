@@ -349,6 +349,8 @@ header{
 
 /* HISTORY */
 .history-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.history-filters .filter-chip{flex:0 0 auto;width:max-content;white-space:nowrap;}
+.sport-history-filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;flex:0 0 auto;}
 .filter-chip{
   padding:6px 14px;border-radius:20px;font-size:.78rem;font-weight:700;
   background:var(--surface2);border:1px solid var(--border);color:var(--muted);

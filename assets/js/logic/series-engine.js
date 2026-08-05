@@ -29,7 +29,11 @@ function updateSeriesDisplay(){
   const toWin=Math.ceil(currentSeries/2);
   document.getElementById('series-s1').textContent=seriesScores.p1;
   document.getElementById('series-s2').textContent=seriesScores.p2;
-  const p1=state.players.find(x=>x.id===p1id),p2=state.players.find(x=>x.id===p2id);
+  let p1=state.players.find(x=>x.id===p1id),p2=state.players.find(x=>x.id===p2id);
+  const teams=getMatchTeams();
+  if(document.getElementById('team-mode-toggle')?.checked&&(!teams.team1[1]||!teams.team2[1])){showToast('Select one teammate for each team.','error');return;}
+  if(teams.team1.length>1)p1={...p1,name:teams.team1.map(p=>p.name).join(' + '),rating:Math.round(teams.team1.reduce((n,p)=>n+p.rating,0)/teams.team1.length),teamMembers:teams.team1};
+  if(teams.team2.length>1)p2={...p2,name:teams.team2.map(p=>p.name).join(' + '),rating:Math.round(teams.team2.reduce((n,p)=>n+p.rating,0)/teams.team2.length),teamMembers:teams.team2};
   document.getElementById('series-status').textContent=`First to ${toWin}  ${seriesGames.length}/${currentSeries} games`;
   // Dots
   let dotsHTML='';
@@ -279,13 +283,16 @@ function undoLastMatch(){
   state.history.pop();
   const p1=state.players.find(x=>x.id===last.p1id);
   const p2=state.players.find(x=>x.id===last.p2id);
-  if(p1){p1.rating=(p1.rating||0)- (last.p1delta||0);}
-  if(p2&&p2.id!==last.p1id){p2.rating=(p2.rating||0)- (last.p2delta||0);}
-  if(p1&&p2&&p1.id!==p2.id&&!last.manualAdjust){
+  const team1=(last.team1ids||[last.p1id]).map(id=>state.players.find(x=>x.id===id)).filter(Boolean);
+  const team2=(last.team2ids||[last.p2id]).map(id=>state.players.find(x=>x.id===id)).filter(Boolean);
+  if(last.team1ids||last.team2ids){team1.forEach(x=>{x.rating=(x.rating||0)-(last.p1delta||0);x.sportRatings[last.sportId]=(x.sportRatings[last.sportId]||0)-(last.p1delta||0);});team2.forEach(x=>{x.rating=(x.rating||0)-(last.p2delta||0);x.sportRatings[last.sportId]=(x.sportRatings[last.sportId]||0)-(last.p2delta||0);});}
+  if(!last.team1ids&&!last.team2ids){if(p1){p1.rating=(p1.rating||0)- (last.p1delta||0);}if(p2&&p2.id!==last.p1id){p2.rating=(p2.rating||0)- (last.p2delta||0);}}
+  if(!last.team1ids&&!last.team2ids&&p1&&p2&&p1.id!==p2.id&&!last.manualAdjust){
     const p1Won=didP1WinMatch(last);
     if(p1Won){p1.wins=Math.max(0,(p1.wins||0)-1);p2.losses=Math.max(0,(p2.losses||0)-1);}
     else{p2.wins=Math.max(0,(p2.wins||0)-1);p1.losses=Math.max(0,(p1.losses||0)-1);}
   }
+  if(last.team1ids||last.team2ids){const p1Won=didP1WinMatch(last);if(p1Won){team1.forEach(x=>x.wins=Math.max(0,(x.wins||0)-1));team2.forEach(x=>x.losses=Math.max(0,(x.losses||0)-1));}else{team2.forEach(x=>x.wins=Math.max(0,(x.wins||0)-1));team1.forEach(x=>x.losses=Math.max(0,(x.losses||0)-1));}}
   state.dailyCount=Math.max(0,(state.dailyCount||0)-1);
   renderAll();
   showToast('Last match undone. ↩️','success');
@@ -296,18 +303,21 @@ function undoLastMatch(){
 function applyChanges(opts){
   if(!pendingChanges&&!opts){showToast('Pick a winner to create an official result first.','error');return;}
   const{p1,p2,p1delta,p2delta,reasoning,context,notes,p1lh,p2lh,tournamentMatch,seriesData,midSeries}=opts||pendingChanges;
+  const sportId=document.getElementById('match-sport')?.value||state.sports?.[0]?.id||'table-tennis';
   if(state.featureFlags?.ft_confirm_upset){
     const bigDiff=Math.abs((p1?.rating||0)-(p2?.rating||0));
     if(bigDiff>=250&&!confirm('Large rating gap detected. Confirm this upset result?'))return;
   }
   const oldR1=p1.rating,oldR2=p2.rating,oldW1=p1.wins||0,oldW2=p2.wins||0;
-  p1.rating+=p1delta;p2.rating+=p2delta;
+  const team1=p1.teamMembers||[p1],team2=p2.teamMembers||[p2];
+  team1.forEach(member=>{member.rating+=p1delta;member.sportRatings=member.sportRatings||{};member.sportRatings[sportId]=(member.sportRatings[sportId]??oldR1)+p1delta;});
+  team2.forEach(member=>{member.rating+=p2delta;member.sportRatings=member.sportRatings||{};member.sportRatings[sportId]=(member.sportRatings[sportId]??oldR2)+p2delta;});
   const p1sc=document.getElementById('p1-score')?.value??'';
   const p2sc=document.getElementById('p2-score')?.value??'';
   const usedMult=parseFloat(document.getElementById('points-multiplier')?.value||'1');
   const p1WonNow=(parseScore(p1sc)!==null&&parseScore(p2sc)!==null)?(parseScore(p1sc)>parseScore(p2sc)):(p1delta>p2delta);
-  if(p1WonNow){p1.wins=(p1.wins||0)+1;p2.losses=(p2.losses||0)+1;}
-  else{p2.wins=(p2.wins||0)+1;p1.losses=(p1.losses||0)+1;}
+  if(p1WonNow){team1.forEach(member=>member.wins=(member.wins||0)+1);team2.forEach(member=>member.losses=(member.losses||0)+1);}
+  else{team2.forEach(member=>member.wins=(member.wins||0)+1);team1.forEach(member=>member.losses=(member.losses||0)+1);}
   const now=new Date();
   const lhTag=[p1lh?p1.name+' (LH)':'',p2lh?p2.name+' (LH)':''].filter(Boolean).join(', ');
   state.history.push({
@@ -317,7 +327,7 @@ function applyChanges(opts){
     p1score:p1sc,p2score:p2sc,
     reasoning,context,notes,mode:'offline',lhTag,multiplier:usedMult,p1lh:!!p1lh,p2lh:!!p2lh,
     tournamentMatch:!!tournamentMatch,
-    seriesData:seriesData||null
+    seriesData:seriesData||null,sportId,scoringType:state.sports?.find(s=>s.id===sportId)?.scoring||'points',team1ids:team1.map(x=>x.id),team2ids:team2.map(x=>x.id)
   });
   const today=new Date().toISOString().slice(0,10);
   if(state.dailyDate!==today){state.dailyDate=today;state.dailyCount=0;}

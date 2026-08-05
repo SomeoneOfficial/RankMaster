@@ -11,20 +11,24 @@ Tips for new developers:
 // ===================== LEADERBOARD =====================
 function renderLeaderboard(){
   const list=document.getElementById('leaderboard-list');
+  const sports=state.sports||[];
+  const active=state.activeSportId||'master';
+  const ratingFor=p=>active==='master'?Math.round(sports.reduce((n,s)=>n+(p.sportRatings?.[s.id]??p.rating??1000),0)/Math.max(1,sports.length)):Math.round(p.sportRatings?.[active]??p.rating??1000);
+  const tabs=`<div class="sport-tabs"><button class="btn ${active==='master'?'btn-primary':'btn-secondary'} btn-sm" onclick="setLeaderboardSport('master')">🌐 Master Average</button>${sports.map(s=>`<button class="btn ${active===s.id?'btn-primary':'btn-secondary'} btn-sm" onclick="setLeaderboardSport('${s.id}')">${s.emoji} ${s.name}</button>`).join('')}</div>`;
   if(!state.players.length){
-    list.innerHTML='<div class="empty-state"><div class="icon"></div><p>No players yet! Add some in Settings.</p></div>';return;
+    list.innerHTML=tabs+'<div class="empty-state"><div class="icon"></div><p>No players yet! Add some in Settings.</p></div>';return;
   }
-  const sorted=[...state.players].sort((a,b)=>b.rating-a.rating);
-  list.innerHTML=sorted.map((p,i)=>{
+  const sorted=[...state.players].sort((a,b)=>ratingFor(b)-ratingFor(a));
+  list.innerHTML=tabs+sorted.map((p,i)=>{
     const rc=i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'';
     const creator=isCreatorPlayer(p);
     const avatar=getPlayerAvatarDisplay(p);
     const streak=getStreak(p.id);
     const rival=getRival(p.id);
-    const t=getTitle(p.rating);
-    const totalG=state.history.filter(h=>(h.p1id===p.id||h.p2id===p.id)&&!h.manualAdjust).length;
+    const shownRating=ratingFor(p),t=getTitle(shownRating);
+    const totalG=state.history.filter(h=>(h.p1id===p.id||h.p2id===p.id)&&!h.manualAdjust&&(active==='master'||h.sportId===active)).length;
     const lv=getLevel(p.wins||0,totalG);
-    const ms=state.history.filter(h=>(h.p1id===p.id||h.p2id===p.id)&&!h.manualAdjust);
+    const ms=state.history.filter(h=>(h.p1id===p.id||h.p2id===p.id)&&!h.manualAdjust&&(active==='master'||h.sportId===active));
     const lastMatch=ms[ms.length-1];
     const lastDelta=lastMatch?(lastMatch.p1id===p.id?lastMatch.p1delta:lastMatch.p2delta):null;
 
@@ -48,11 +52,13 @@ function renderLeaderboard(){
         </div>
       </div>
       <div class="rating-col">
-        <div class="player-rating" style="color:${p.color}">${p.rating}</div>
+        <div class="player-rating" style="color:${p.color}">${shownRating}</div>
         ${lastDelta!==null?`<div class="rating-delta-mini" style="color:${lastDelta>=0?'var(--green)':'var(--red)'}">${lastDelta>0?'+':''}${lastDelta} last</div>`:''}
       </div>
     </div>`;
   }).join('');
 }
+
+function setLeaderboardSport(id){state.activeSportId=id;renderLeaderboard();}
 
 

@@ -11,13 +11,14 @@ Tips for new developers:
 // ===================== MANUAL ADJUST =====================
 function openManualAdjustModal(){
   const sel=document.getElementById('adjust-player-select');
-  sel.innerHTML=state.players.map(p=>`<option value="${p.id}">${p.name} (${p.rating})</option>`).join('');
+  sel.innerHTML=state.players.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
+  const sportSel=document.getElementById('adjust-sport-select');if(sportSel)sportSel.innerHTML=(state.sports||[]).map(s=>`<option value="${s.id}">${s.emoji} ${s.name}</option>`).join('');
   prefillAdjustRating();document.getElementById('adjust-reason').value='';
   document.getElementById('adjust-modal').classList.add('show');
 }
 function prefillAdjustRating(){
   const pid=parseInt(document.getElementById('adjust-player-select').value);
-  const p=state.players.find(x=>x.id===pid);if(p)document.getElementById('adjust-rating-val').value=p.rating;
+  const p=state.players.find(x=>x.id===pid),sid=document.getElementById('adjust-sport-select')?.value||'table-tennis';if(p)document.getElementById('adjust-rating-val').value=p.sportRatings?.[sid]??p.rating;
 }
 function applyManualAdjust(){
   const pid=parseInt(document.getElementById('adjust-player-select').value);
@@ -25,8 +26,8 @@ function applyManualAdjust(){
   const reason=document.getElementById('adjust-reason').value.trim();
   if(!pid||isNaN(newR)){showToast('Fill in player and new rating!','error');return;}
   const p=state.players.find(x=>x.id===pid);
-  const oldR=p.rating,delta=newR-oldR;p.rating=newR;
-  state.history.push({id:state.nextId++,time:formatTime(new Date()),p1id:p.id,p2id:p.id,p1name:p.name,p2name:p.name,p1delta:delta,p2delta:0,p1ratBefore:oldR,p2ratBefore:oldR,reasoning:reason||'Manual adjustment',context:'',notes:'',mode:'manual',lhTag:'',manualAdjust:true});
+  const sid=document.getElementById('adjust-sport-select')?.value||'table-tennis';p.sportRatings=p.sportRatings||{};const oldR=p.sportRatings[sid]??p.rating,delta=newR-oldR;p.sportRatings[sid]=newR;if(sid==='table-tennis')p.rating=newR;
+  state.history.push({id:state.nextId++,time:formatTime(new Date()),p1id:p.id,p2id:p.id,p1name:p.name,p2name:p.name,p1delta:delta,p2delta:0,p1ratBefore:oldR,p2ratBefore:oldR,reasoning:reason||'Manual adjustment',context:'',notes:'',mode:'manual',lhTag:'',manualAdjust:true,sportId:sid,scoringType:'manual'});
   closeModal('adjust-modal');renderAll();showToast(`${p.name}  ${newR} `,'success');
 }
 

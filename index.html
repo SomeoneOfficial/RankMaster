@@ -97,6 +97,7 @@
 
     <!-- MATCH TOOLS (row 1): random matchup + prediction panel toggle -->
     <div class="match-toolbar">
+      <label style="display:flex;align-items:center;gap:7px;font-size:.82rem;color:var(--muted)"><input type="checkbox" id="team-mode-toggle" onchange="toggleTeamMode(this.checked)"> 2v2 Team Game</label>
       <button class="btn match-action-btn" onclick="openSpinner()" >🎲 Spin Matchup</button>
       
       <button class="btn match-action-btn" id="pred-toggle-btn" onclick="togglePredictionVisibility()">📈 Show Win Probability</button>
@@ -123,6 +124,7 @@
         <select class="big-select" id="p1-select" onchange="onPlayerSelect()">
           <option value=""> Select Player 1 </option>
         </select>
+        <select class="big-select team-player-select" id="p1-team-select" onchange="onPlayerSelect()" style="display:none;margin-top:8px"><option value="">Select teammate</option></select>
         <!-- Dynamic preview of selected player -->
         <div class="selected-player-preview" id="p1-preview">
           <span style="color:var(--muted);font-size:.82rem">No player selected</span>
@@ -151,6 +153,7 @@
         <select class="big-select" id="p2-select" onchange="onPlayerSelect()">
           <option value=""> Select Player 2 </option>
         </select>
+        <select class="big-select team-player-select" id="p2-team-select" onchange="onPlayerSelect()" style="display:none;margin-top:8px"><option value="">Select teammate</option></select>
         <!-- Dynamic preview of selected player -->
         <div class="selected-player-preview" id="p2-preview">
           <span style="color:var(--muted);font-size:.82rem">No player selected</span>
@@ -204,6 +207,11 @@
     <!-- EXTRA MATCH META: context, multiplier, notes -->
     <div class="match-options">
       <div class="context-row">
+        <div>
+          <div style="font-size:.72rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px">🏅 Sport + scoring</div>
+          <select id="match-sport" onchange="window.currentMatchSport=this.value" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:7px;color:var(--text);padding:9px 12px;font-family:'DM Sans',sans-serif;font-size:.88rem"></select>
+          <div style="font-size:.72rem;color:var(--muted);margin-top:5px">Choose the sport before logging. Its rating changes independently; Master Average is calculated from all sport ratings.</div>
+        </div>
         <div>
           <!-- Free-text context + datalist suggestions -->
           <div style="font-size:.72rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px">🎮 Game / Context</div>
@@ -273,6 +281,8 @@
       <div class="filter-chip" onclick="filterHistory('tournament',this)">Tournament</div>
       <div class="filter-chip" onclick="filterHistory('series',this)">Series</div>
       <div class="filter-chip" onclick="filterHistory('manual',this)">Manual</div>
+      <div class="filter-chip" onclick="filterHistory('sport:table-tennis',this)">🏓 Table Tennis</div>
+      <div class="sport-history-filters" id="sport-history-filters"></div>
     </div>
     <!-- Search box -->
     <div style="display:flex;gap:8px;">
@@ -314,6 +324,7 @@
     <div class="settings-subtabs">
       <button class="settings-subtab active" data-pane="general" onclick="switchSettingsTab('general')">General</button>
       <button class="settings-subtab" data-pane="players" onclick="switchSettingsTab('players')">Players</button>
+      <button class="settings-subtab" data-pane="sports" onclick="switchSettingsTab('sports')">Sports</button>
       <button class="settings-subtab" data-pane="features" onclick="switchSettingsTab('features')">Features</button>
       <button class="settings-subtab" data-pane="appearance" onclick="switchSettingsTab('appearance')">Appearance</button>
       <button class="settings-subtab" data-pane="data" onclick="switchSettingsTab('data')">Data</button>
@@ -361,6 +372,13 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- SETTINGS PANE: PLAYERS (add/edit player profiles) -->
+    <div id="settings-pane-sports" class="settings-pane">
+      <div class="settings-section"><h2>🏅 Sports + Scoring</h2><p style="color:var(--muted);font-size:.85rem">Each logged match updates that sport's rating. The Master Average combines all configured sports equally.</p>
+        <div class="add-player-form"><div class="form-group"><label>Sport</label><input id="sport-name" placeholder="e.g. Volleyball"></div><div class="form-group"><label>Emoji</label><input id="sport-emoji" value="🎯"></div><div class="form-group"><label>Scoring type</label><select id="sport-scoring"><option value="points">Higher score wins</option><option value="sets">Sets / games won</option><option value="win-loss">Win / loss only</option></select></div><div class="form-group"><label>Target</label><input type="number" id="sport-target" value="1" min="1"></div><div class="form-group"><label>Base rating</label><input type="number" id="sport-base-rating" value="1000" min="0"></div><button class="btn btn-primary" onclick="addSport()">Add Sport</button></div>
+        <div id="sports-list" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:16px"></div></div>
     </div>
 
     <!-- SETTINGS PANE: PLAYERS (add/edit player profiles) -->
@@ -558,6 +576,7 @@
     <div class="form-group"><label>Player</label>
       <select id="adjust-player-select" onchange="prefillAdjustRating()"></select>
     </div>
+    <div class="form-group"><label>Sport</label><select id="adjust-sport-select" onchange="prefillAdjustRating()"></select></div>
     <div class="form-group"><label>New Rating</label><input type="number" id="adjust-rating-val"></div>
     <div class="form-group"><label>Reason (optional)</label><input type="text" id="adjust-reason" placeholder="e.g. Correcting mistake"></div>
     <div class="modal-actions">
