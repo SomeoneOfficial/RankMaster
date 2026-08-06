@@ -178,7 +178,10 @@ function computeAndShowResult(p1,p2,winner,p1sc,p2sc,isSeries=false,seriesInfo=n
   const mult=parseFloat(document.getElementById('points-multiplier')?.value||'1');
   const vErr=validateWinnerScores(winner,p1sc,p2sc);
   if(vErr){showToast(vErr,'error');return;}
-  const r=offlineAlgorithm(p1,p2,p1sc,p2sc,p1lh,p2lh,mult);
+  const sportId=document.getElementById('match-sport')?.value||state.sports?.[0]?.id||'table-tennis';
+  const sportP1={...p1,rating:p1.sportRatings?.[sportId]??p1.rating??1000};
+  const sportP2={...p2,rating:p2.sportRatings?.[sportId]??p2.rating??1000};
+  const r=offlineAlgorithm(sportP1,sportP2,p1sc,p2sc,p1lh,p2lh,mult);
   let titleText=' Match Result';
   if(midSeries){
     const toWin=Math.ceil(currentSeries/2);
@@ -206,12 +209,12 @@ function computeAndShowResult(p1,p2,winner,p1sc,p2sc,isSeries=false,seriesInfo=n
     <div class="rating-change">
       <div class="rc-name" style="color:${p1.color}">${p1.name}${lbTag(p1lh)}</div>
       <div class="rc-delta ${r.p1_delta>=0?'pos':'neg'}">${r.p1_delta>0?'+':''}${r.p1_delta}</div>
-      <div style="font-size:.75rem;color:var(--muted)">${p1.rating}  ${p1.rating+r.p1_delta}</div>
+      <div style="font-size:.75rem;color:var(--muted)">${sportP1.rating}  ${sportP1.rating+r.p1_delta}</div>
     </div>
     <div class="rating-change">
       <div class="rc-name" style="color:${p2.color}">${p2.name}${lbTag(p2lh)}</div>
       <div class="rc-delta ${r.p2_delta>=0?'pos':'neg'}">${r.p2_delta>0?'+':''}${r.p2_delta}</div>
-      <div style="font-size:.75rem;color:var(--muted)">${p2.rating}  ${p2.rating+r.p2_delta}</div>
+      <div style="font-size:.75rem;color:var(--muted)">${sportP2.rating}  ${sportP2.rating+r.p2_delta}</div>
     </div>`;
   // For mid-series games, change confirm button text
   const confirmBtn=document.querySelector('#result-panel .btn-success');
@@ -304,14 +307,15 @@ function applyChanges(opts){
   if(!pendingChanges&&!opts){showToast('Pick a winner to create an official result first.','error');return;}
   const{p1,p2,p1delta,p2delta,reasoning,context,notes,p1lh,p2lh,tournamentMatch,seriesData,midSeries}=opts||pendingChanges;
   const sportId=document.getElementById('match-sport')?.value||state.sports?.[0]?.id||'table-tennis';
+  const sportRating=p=>(p?.sportRatings?.[sportId]??p?.rating??1000);
   if(state.featureFlags?.ft_confirm_upset){
-    const bigDiff=Math.abs((p1?.rating||0)-(p2?.rating||0));
+    const bigDiff=Math.abs(sportRating(p1)-sportRating(p2));
     if(bigDiff>=250&&!confirm('Large rating gap detected. Confirm this upset result?'))return;
   }
-  const oldR1=p1.rating,oldR2=p2.rating,oldW1=p1.wins||0,oldW2=p2.wins||0;
+  const oldR1=sportRating(p1),oldR2=sportRating(p2),oldW1=p1.wins||0,oldW2=p2.wins||0;
   const team1=p1.teamMembers||[p1],team2=p2.teamMembers||[p2];
-  team1.forEach(member=>{member.rating+=p1delta;member.sportRatings=member.sportRatings||{};member.sportRatings[sportId]=(member.sportRatings[sportId]??oldR1)+p1delta;});
-  team2.forEach(member=>{member.rating+=p2delta;member.sportRatings=member.sportRatings||{};member.sportRatings[sportId]=(member.sportRatings[sportId]??oldR2)+p2delta;});
+  team1.forEach(member=>{member.sportRatings=member.sportRatings||{};member.sportRatings[sportId]=(member.sportRatings[sportId]??oldR1)+p1delta;});
+  team2.forEach(member=>{member.sportRatings=member.sportRatings||{};member.sportRatings[sportId]=(member.sportRatings[sportId]??oldR2)+p2delta;});
   const p1sc=document.getElementById('p1-score')?.value??'';
   const p2sc=document.getElementById('p2-score')?.value??'';
   const usedMult=parseFloat(document.getElementById('points-multiplier')?.value||'1');
