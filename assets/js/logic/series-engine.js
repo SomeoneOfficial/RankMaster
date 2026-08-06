@@ -288,8 +288,9 @@ function undoLastMatch(){
   const p2=state.players.find(x=>x.id===last.p2id);
   const team1=(last.team1ids||[last.p1id]).map(id=>state.players.find(x=>x.id===id)).filter(Boolean);
   const team2=(last.team2ids||[last.p2id]).map(id=>state.players.find(x=>x.id===id)).filter(Boolean);
-  if(last.team1ids||last.team2ids){team1.forEach(x=>{x.rating=(x.rating||0)-(last.p1delta||0);x.sportRatings[last.sportId]=(x.sportRatings[last.sportId]||0)-(last.p1delta||0);});team2.forEach(x=>{x.rating=(x.rating||0)-(last.p2delta||0);x.sportRatings[last.sportId]=(x.sportRatings[last.sportId]||0)-(last.p2delta||0);});}
-  if(!last.team1ids&&!last.team2ids){if(p1){p1.rating=(p1.rating||0)- (last.p1delta||0);}if(p2&&p2.id!==last.p1id){p2.rating=(p2.rating||0)- (last.p2delta||0);}}
+  const sportId=last.sportId||'table-tennis';
+  if(last.team1ids||last.team2ids){team1.forEach(x=>{x.sportRatings=x.sportRatings||{};x.sportRatings[sportId]=(x.sportRatings[sportId]||0)-(last.p1delta||0);});team2.forEach(x=>{x.sportRatings=x.sportRatings||{};x.sportRatings[sportId]=(x.sportRatings[sportId]||0)-(last.p2delta||0);});}
+  if(!last.team1ids&&!last.team2ids){if(p1){p1.sportRatings=p1.sportRatings||{};p1.sportRatings[sportId]=(p1.sportRatings[sportId]||0)-(last.p1delta||0);}if(p2&&p2.id!==last.p1id){p2.sportRatings=p2.sportRatings||{};p2.sportRatings[sportId]=(p2.sportRatings[sportId]||0)-(last.p2delta||0);}}
   if(!last.team1ids&&!last.team2ids&&p1&&p2&&p1.id!==p2.id&&!last.manualAdjust){
     const p1Won=didP1WinMatch(last);
     if(p1Won){p1.wins=Math.max(0,(p1.wins||0)-1);p2.losses=Math.max(0,(p2.losses||0)-1);}
